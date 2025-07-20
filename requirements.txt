@@ -1,11 +1,11 @@
-# Dependencias principales - Versiones estables para Docker
+# Dependencias principales
 Flask==3.0.0
 Flask-Mail==0.9.1
 python-dotenv==1.0.0
 
-# OCR - Versiones compatibles con Docker
-pytesseract==0.3.10
+# OCR ligero sin dependencias del sistema
 Pillow==10.0.1
+paddleocr==2.7.3
 
 # Servidor de producción
 gunicorn==20.1.0
