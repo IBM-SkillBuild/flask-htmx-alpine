@@ -20,7 +20,8 @@ def configure_ocr():
     try:
         from paddleocr import PaddleOCR
         # Inicializar PaddleOCR con inglés (más ligero)
-        ocr_config['easyocr_reader'] = PaddleOCR(use_angle_cls=True, lang='en', use_gpu=False)
+        ocr_config['easyocr_reader'] = PaddleOCR(
+            use_angle_cls=True, lang='en', use_gpu=False)
         ocr_config['easyocr_available'] = True
         print("✅ PaddleOCR configurado correctamente (inglés)")
     except ImportError:
@@ -553,13 +554,15 @@ def ocr_process():
         # Intentar OCR real con PaddleOCR primero, luego Tesseract como fallback
         if OCR_CONFIG['easyocr_available']:
             try:
-                print(f"🔍 Procesando imagen con PaddleOCR (idioma: {language})")
+                print(
+                    f"🔍 Procesando imagen con PaddleOCR (idioma: {language})")
 
                 # Leer la imagen desde el archivo subido
                 image_data = file.read()
 
                 # Procesar con PaddleOCR
-                results = OCR_CONFIG['easyocr_reader'].ocr(image_data, cls=True)
+                results = OCR_CONFIG['easyocr_reader'].ocr(
+                    image_data, cls=True)
 
                 # Extraer texto y confianza de PaddleOCR
                 extracted_texts = []
@@ -569,17 +572,20 @@ def ocr_process():
                     for line in results[0]:
                         if len(line) >= 2:
                             text = line[1][0]  # Texto extraído
-                            confidence = line[1][1] * 100  # Confianza (0-1 -> 0-100)
+                            # Confianza (0-1 -> 0-100)
+                            confidence = line[1][1] * 100
                             extracted_texts.append(text)
                             confidences.append(confidence)
 
                 extracted_text = ' '.join(extracted_texts).strip()
-                avg_confidence = sum(confidences) / len(confidences) if confidences else 0
+                avg_confidence = sum(confidences) / \
+                    len(confidences) if confidences else 0
 
                 if not extracted_text:
                     print("⚠️ PaddleOCR no extrajo texto, intentando con Tesseract...")
                 else:
-                    print(f"✅ PaddleOCR completado. Texto extraído: {len(extracted_text)} caracteres")
+                    print(
+                        f"✅ PaddleOCR completado. Texto extraído: {len(extracted_text)} caracteres")
                     return render_template('responses/prueba_texto.html',
                                            text=extracted_text,
                                            confidence=int(avg_confidence),
