@@ -116,6 +116,17 @@ def index():
     return render_template('index.html', data=initial_data)
 
 
+@app.route('/health')
+def health_check():
+    """Health check endpoint for monitoring and preventing cold starts"""
+    from datetime import datetime
+    return jsonify({
+        'status': 'ok',
+        'timestamp': datetime.now().isoformat(),
+        'service': 'flask-htmx-alpine'
+    })
+
+
 @app.route('/api/data')
 def api_data():
     return render_template('responses/api_data.html')
