@@ -1,0 +1,75 @@
+{
+  "name": "Flask HTMX Alpine SPA",
+  "short_name": "Flask SPA",
+  "description": "Aplicación web moderna construida con Flask, HTMX y Alpine.js",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d6efd",
+  "theme_color": "#0d6efd",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "es",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/static/images/icon-512-colored.png?v=3",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/images/icon-512-maskable.png?v=3",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/static/images/icon-192-colored.png?v=3",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/images/icon-192-maskable.png?v=3",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/static/images/logo-1200.png",
+      "sizes": "1200x800",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "OCR",
+      "short_name": "OCR",
+      "description": "Extractor de texto de imágenes",
+      "url": "/ocr",
+      "icons": [
+        {
+          "src": "/static/images/icon-192-colored.png?v=3",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Contacto",
+      "short_name": "Contacto",
+      "description": "Formulario de contacto",
+      "url": "/contact",
+      "icons": [
+        {
+          "src": "/static/images/icon-192-colored.png?v=3",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

@@ -1,0 +1,70 @@
+<div class="alert alert-success" id="api-data-container">
+  <h5>¡Datos cargados exitosamente!</h5>
+  <p>Mensaje: Hola desde la API</p>
+  <p>Status: success</p>
+  <small class="text-muted">Cargado dinámicamente con HTMX</small>
+
+  <hr />
+
+  <div class="text-center">
+    <button class="btn btn-outline-secondary btn-sm" onclick="closeApiData()">
+      ❌ Cerrar
+    </button>
+  </div>
+</div>
+
+<script>
+  // Función global para cerrar/eliminar el contenido del DOM
+  window.closeApiData = function () {
+    console.log("🔍 closeApiData() ejecutándose...");
+
+    const apiResponse = document.getElementById("api-response");
+    console.log("🔍 Elemento #api-response encontrado:", apiResponse);
+
+    if (apiResponse) {
+      console.log(
+        "🔍 Contenido antes de limpiar:",
+        apiResponse.innerHTML.length,
+        "caracteres"
+      );
+      apiResponse.innerHTML = "";
+      console.log(
+        "🔍 Contenido después de limpiar:",
+        apiResponse.innerHTML.length,
+        "caracteres"
+      );
+    } else {
+      console.error("❌ No se encontró el elemento #api-response");
+    }
+
+    // Mostrar el botón de API nuevamente
+    const appElement = document.querySelector("[x-data]");
+    console.log("🔍 Elemento Alpine encontrado:", appElement);
+
+    if (appElement && appElement._x_dataStack && appElement._x_dataStack[0]) {
+      appElement._x_dataStack[0].showApiButton = true;
+      console.log("✅ showApiButton cambiado a true");
+    } else {
+      console.error("❌ No se pudo acceder al store de Alpine.js");
+    }
+
+    console.log("❌ Función closeApiData() completada");
+  };
+
+  // Ejecutar después de que HTMX haya terminado de cargar el contenido
+  document.addEventListener("htmx:afterSettle", function (event) {
+    // Verificar si este evento es para nuestro contenido de API
+    if (event.target.querySelector("#api-data-container")) {
+      // Scroll suave
+      if (typeof fluidScroll !== "undefined") {
+        fluidScroll({
+          yPos: "end",
+          easing: "easeOutQuart",
+          duration: 1500,
+        });
+      }
+
+      console.log("🚀 Script de API data inicializado después de HTMX settle");
+    }
+  });
+</script>

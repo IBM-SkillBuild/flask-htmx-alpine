@@ -1,0 +1,1668 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- SEO Meta Tags -->
+    <title>Flask HTMX Alpine SPA - Aplicación Web Moderna</title>
+    <meta
+      name="description"
+      content="Aplicación web moderna construida con Flask, HTMX y Alpine.js. Incluye OCR, chat bot, gestión de contactos y más funcionalidades avanzadas."
+    />
+    <meta
+      name="keywords"
+      content="Flask, HTMX, Alpine.js, SPA, OCR, Python, JavaScript, Web App, Aplicación Web"
+    />
+    <meta name="author" content="Flask HTMX SPA" />
+    <meta name="robots" content="index, follow" />
+    <meta name="language" content="Spanish" />
+    <meta name="revisit-after" content="7 days" />
+
+    <!-- Favicon (navegador) - DEBE IR PRIMERO -->
+    <link
+      rel="shortcut icon"
+      type="image/x-icon"
+      href="{{ url_for('static', filename='images/favicon.ico') }}"
+    />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="{{ url_for('static', filename='images/favicon.ico') }}"
+    />
+    <!-- Favicon PNG para navegadores modernos (solo tamaños grandes para evitar que Android los use) -->
+
+    <!-- Apple Touch Icons -->
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="{{ url_for('static', filename='images/logo.png') }}"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="152x152"
+      href="{{ url_for('static', filename='images/logo.png') }}"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="144x144"
+      href="{{ url_for('static', filename='images/logo.png') }}"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="120x120"
+      href="{{ url_for('static', filename='images/logo.png') }}"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="114x114"
+      href="{{ url_for('static', filename='images/logo.png') }}"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="76x76"
+      href="{{ url_for('static', filename='images/logo.png') }}"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="72x72"
+      href="{{ url_for('static', filename='images/logo.png') }}"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="60x60"
+      href="{{ url_for('static', filename='images/logo.png') }}"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="57x57"
+      href="{{ url_for('static', filename='images/logo.png') }}"
+    />
+
+    <!-- Android Chrome Icons (solo para PWA) - con cache busting -->
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="512x512"
+      href="{{ url_for('static', filename='images/icon-512-colored.png') }}?v=3"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="{{ url_for('static', filename='images/icon-192-colored.png') }}?v=3"
+    />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="{{ request.url }}" />
+    <meta
+      property="og:title"
+      content="Flask HTMX Alpine SPA - Aplicación Web Moderna"
+    />
+    <meta
+      property="og:description"
+      content="Aplicación web moderna construida con Flask, HTMX y Alpine.js. Incluye OCR, chat bot, gestión de contactos y más funcionalidades avanzadas."
+    />
+    <meta
+      property="og:image"
+      content="{{ url_for('static', filename='images/logo-1200.png', _external=True) }}"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Flask HTMX Alpine SPA Logo" />
+    <meta property="og:site_name" content="Flask HTMX SPA" />
+    <meta property="og:locale" content="es_ES" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="{{ request.url }}" />
+    <meta
+      name="twitter:title"
+      content="Flask HTMX Alpine SPA - Aplicación Web Moderna"
+    />
+    <meta
+      name="twitter:description"
+      content="Aplicación web moderna construida con Flask, HTMX y Alpine.js. Incluye OCR, chat bot, gestión de contactos y más funcionalidades avanzadas."
+    />
+    <meta
+      name="twitter:image"
+      content="{{ url_for('static', filename='images/logo-1200.png', _external=True) }}"
+    />
+    <meta name="twitter:image:alt" content="Flask HTMX Alpine SPA Logo" />
+
+    <!-- LinkedIn -->
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="627" />
+
+    <!-- WhatsApp -->
+    <meta property="og:image:type" content="image/png" />
+
+    <!-- Telegram -->
+    <meta name="telegram:channel" content="@flaskhtmxspa" />
+
+    <!-- Mobile Web App Capable -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Flask HTMX SPA" />
+
+    <!-- Microsoft Tiles -->
+    <meta name="msapplication-TileColor" content="#0d6efd" />
+    <meta
+      name="msapplication-TileImage"
+      content="{{ url_for('static', filename='images/logo.png') }}"
+    />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
+
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#0d6efd" />
+    <meta name="msapplication-navbutton-color" content="#0d6efd" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="#0d6efd" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="{{ request.url }}" />
+
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://unpkg.com" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+    <link rel="dns-prefetch" href="https://unpkg.com" />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Flask HTMX Alpine SPA",
+        "description": "Aplicación web moderna construida con Flask, HTMX y Alpine.js",
+        "url": "{{ request.url_root }}",
+        "applicationCategory": "WebApplication",
+        "operatingSystem": "All",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "EUR"
+        },
+        "author": {
+          "@type": "Organization",
+          "name": "Flask HTMX SPA"
+        }
+      }
+    </script>
+
+    <!-- Inicialización INMEDIATA del tema para evitar flash -->
+    <script>
+      (function () {
+        // Cargar usuario desde localStorage
+        const userData = JSON.parse(
+          localStorage.getItem("app-user") ||
+            '{"preferences":{"theme":"light"}}'
+        );
+        const savedTheme = userData.preferences.theme || "light";
+
+        document.documentElement.setAttribute("data-theme", savedTheme);
+
+        // También aplicar al body cuando esté disponible
+        document.addEventListener("DOMContentLoaded", function () {
+          document.body.setAttribute("data-theme", savedTheme);
+        });
+
+        console.log(
+          "Tema aplicado inmediatamente desde localStorage:",
+          savedTheme
+        );
+      })();
+    </script>
+
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+    <!-- Alpine.js -->
+    <script
+      defer
+      src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+
+    <!-- FluidScroll -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/fluidscroll@2.0.0"
+      integrity="sha384-ZvfwaJZFftLPOaPS13spccPYdWRcrfz/GDgUYAf7b6I2OBXY74KiAC6WVg0XF3Qq"
+      crossorigin="anonymous"
+    ></script>
+
+    <!-- Alpine.js Components -->
+    <script src="{{ url_for('static', filename='js/alpine-components.js') }}"></script>
+
+    <!-- Service Worker Registration -->
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("/static/sw.js")
+            .then((registration) => {
+              console.log("SW registrado: ", registration);
+            })
+            .catch((registrationError) => {
+              console.log("SW registro falló: ", registrationError);
+            });
+        });
+      }
+    </script>
+
+    <!-- Bootstrap CSS para estilos rápidos -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Bootstrap JS para funcionalidad del navbar -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Estilos personalizados - v4 (botón tema integrado en navbar) -->
+    <style>
+      .htmx-indicator {
+        opacity: 0;
+        transition: opacity 500ms ease-in;
+      }
+      .htmx-request .htmx-indicator {
+        opacity: 1;
+      }
+      .htmx-request.htmx-indicator {
+        opacity: 1;
+      }
+
+      /* Animaciones para contenido HTMX */
+      .htmx-settling {
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 300ms ease-out;
+      }
+
+      .htmx-settling.htmx-added {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* Fade in para nuevo contenido */
+      [hx-target] {
+        transition: all 250ms ease-in-out;
+      }
+
+      /* Animación de entrada para contenido dinámico */
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeInDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Aplicar animaciones a contenido HTMX */
+      #main-content > * {
+        animation: fadeInUp 400ms ease-out;
+      }
+
+      #api-response > * {
+        animation: fadeInDown 300ms ease-out;
+      }
+
+      #quick-data > * {
+        animation: fadeInUp 250ms ease-out;
+      }
+
+      #system-details > * {
+        animation: fadeInDown 350ms ease-out;
+      }
+
+      /* Efecto de salida suave */
+      .htmx-swapping {
+        opacity: 0;
+        transform: translateY(-5px);
+        transition: all 200ms ease-in;
+      }
+
+      /* Efecto de carga elegante para HTMX */
+      .htmx-request {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .htmx-request::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(13, 110, 253, 0.3),
+          rgba(13, 110, 253, 0.8),
+          rgba(13, 110, 253, 1),
+          rgba(13, 110, 253, 0.8),
+          rgba(13, 110, 253, 0.3),
+          transparent
+        );
+        animation: elegant-loading 2s ease-in-out infinite;
+        z-index: 1000;
+        border-radius: 0 0 2px 2px;
+        box-shadow: 0 2px 4px rgba(13, 110, 253, 0.3);
+      }
+
+      .htmx-request::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.8),
+          transparent
+        );
+        animation: elegant-loading-shine 2s ease-in-out infinite;
+        z-index: 1001;
+      }
+
+      @keyframes elegant-loading {
+        0% {
+          transform: translateX(-100%);
+          opacity: 0;
+        }
+        20% {
+          opacity: 1;
+        }
+        80% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+      }
+
+      @keyframes elegant-loading-shine {
+        0% {
+          transform: translateX(-100%);
+          opacity: 0;
+        }
+        50% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+      }
+
+      /* Micro-interacciones para botones HTMX (excluyendo formularios) */
+      [hx-get]:not(form):not(form *),
+      [hx-post]:not(form):not(form *) {
+        transition: all 200ms ease;
+      }
+
+      [hx-get]:not(form):not(form *):hover,
+      [hx-post]:not(form):not(form *):hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      [hx-get]:not(form):not(form *):active,
+      [hx-post]:not(form):not(form *):active {
+        transform: translateY(0);
+        transition: all 100ms ease;
+      }
+
+      .navbar-brand {
+        font-weight: bold;
+      }
+
+      /* Estilos para navegación activa */
+      .nav-link {
+        cursor: pointer !important;
+        transition: all 0.3s ease;
+      }
+
+      .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        border-radius: 5px;
+      }
+
+      .nav-link.active {
+        background-color: rgba(255, 255, 255, 0.2) !important;
+        border-radius: 5px;
+        font-weight: bold;
+        color: #fff !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        cursor: pointer !important;
+      }
+
+      .nav-link.disabled {
+        pointer-events: none;
+        opacity: 0.6;
+        cursor: not-allowed !important;
+      }
+
+      /* Elemento activo Y disabled - más contrastado */
+      .nav-link.active.disabled {
+        background-color: rgba(255, 255, 255, 0.35) !important;
+        border-radius: 5px;
+        font-weight: bold;
+        color: #fff !important;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+        opacity: 1 !important; /* Sobrescribir el opacity del disabled */
+        cursor: default !important;
+        transition: all 0.2s ease;
+      }
+
+      /* Padding para elementos de navegación en móvil */
+      @media (max-width: 991.98px) {
+        .navbar-nav {
+          margin-top: 2em !important;
+        }
+
+        .navbar-nav .nav-link {
+          padding-left: 1rem !important;
+          padding-right: 1rem !important;
+          padding-top: 0.5rem !important;
+          padding-bottom: 0.5rem !important;
+          margin-bottom: 0.25rem;
+        }
+
+        .navbar-nav .nav-link.active,
+        .navbar-nav .nav-link.active.disabled {
+          margin-left: 0.25rem;
+          margin-right: 0.25rem;
+        }
+      }
+
+      .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Temas Dark y Light */
+      :root {
+        --bg-color: #bbdefb;
+        --text-color: #212529;
+        --card-bg: #ffffff;
+        --border-color: #dee2e6;
+        --input-bg: #ffffff;
+        --input-border: #ced4da;
+        --footer-bg: #f8f9fa;
+        --footer-text: #6c757d;
+        --badge-bg: #e9ecef;
+        --badge-text: #495057;
+        --toast-bg: #2d2d2d;
+        --toast-border: #495057;
+        --card-hover: #f8f9fa;
+        --alert-bg: #f8f9fa;
+      }
+
+      [data-theme="dark"] {
+        --bg-color: #1a1a1a;
+        --text-color: #e9ecef;
+        --card-bg: #2d2d2d;
+        --border-color: #495057;
+        --input-bg: #343a40;
+        --input-border: #495057;
+        --footer-bg: #212529;
+        --footer-text: #adb5bd;
+        --badge-bg: #495057;
+        --badge-text: #e9ecef;
+        --toast-bg: #ffffff;
+        --toast-border: #dee2e6;
+      }
+
+      body {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        transition: background-color 0.3s ease, color 0.3s ease;
+        min-height: 100vh;
+      }
+
+      .card {
+        background-color: var(--card-bg);
+        border-color: var(--border-color);
+        color: var(--text-color);
+      }
+
+      .form-control {
+        background-color: var(--input-bg);
+        border-color: var(--input-border);
+        color: var(--text-color);
+      }
+
+      .form-control:focus {
+        background-color: var(--input-bg);
+        border-color: #0d6efd;
+        color: var(--text-color);
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+      }
+
+      footer {
+        background-color: #0d6efd !important; /* Mismo azul que el navbar */
+        color: #ffffff !important; /* Texto blanco */
+      }
+
+      .text-muted {
+        color: var(--footer-text) !important;
+      }
+
+      /* Estilos para badges y toasts en tema dark */
+      .badge {
+        background-color: var(--badge-bg) !important;
+        color: var(--badge-text) !important;
+      }
+
+      .badge.bg-info {
+        background-color: #0dcaf0 !important;
+        color: #000 !important;
+      }
+
+      .badge.bg-secondary {
+        background-color: #6c757d !important;
+        color: #fff !important;
+      }
+
+      .badge.bg-success {
+        background-color: #198754 !important;
+        color: #fff !important;
+      }
+
+      .badge.bg-danger {
+        background-color: #dc3545 !important;
+        color: #fff !important;
+      }
+
+      .toast {
+        background-color: var(--toast-bg) !important;
+        border-color: var(--toast-border) !important;
+      }
+
+      .toast-header {
+        background-color: var(--toast-bg) !important;
+        border-bottom-color: var(--toast-border) !important;
+      }
+
+      .toast-body {
+      }
+
+      /* Colores de texto específicos para notificaciones */
+      :root .toast,
+      :root .toast-header,
+      :root .toast-body {
+        color: #e9ecef !important; /* Texto claro para fondo oscuro en tema light */
+      }
+
+      [data-theme="dark"] .toast,
+      [data-theme="dark"] .toast-header,
+      [data-theme="dark"] .toast-body {
+        color: #212529 !important; /* Texto oscuro para fondo claro en tema dark */
+      }
+
+      /* Botón cerrar notificaciones con contraste correcto */
+      .toast .btn-close {
+        filter: brightness(0) invert(1) !important; /* X blanca para fondo oscuro en tema light */
+        opacity: 1 !important;
+      }
+
+      [data-theme="dark"] .toast .btn-close {
+        filter: none !important; /* X negra para fondo claro en tema dark */
+        opacity: 1 !important;
+      }
+
+      /* Botones outline en tema dark */
+      [data-theme="dark"] .btn-outline-primary {
+        color: #0d6efd;
+        border-color: #0d6efd;
+      }
+
+      [data-theme="dark"] .btn-outline-primary:hover {
+        background-color: #0d6efd;
+        color: #fff;
+      }
+
+      [data-theme="dark"] .btn-outline-success {
+        color: #198754;
+        border-color: #198754;
+      }
+
+      [data-theme="dark"] .btn-outline-success:hover {
+        background-color: #198754;
+        color: #fff;
+      }
+
+      /* Loading spinner en tema dark */
+      [data-theme="dark"] .loading-spinner {
+        border: 3px solid #495057;
+        border-top: 3px solid #0d6efd;
+      }
+
+      /* Estilos específicos para alertas en tema dark */
+      [data-theme="dark"] .alert-info {
+        background-color: #0c5460 !important;
+        border-color: #0a4c57 !important;
+        color: #b8daff !important;
+      }
+
+      [data-theme="dark"] .alert-info .btn-outline-danger {
+        color: #f5c2c7 !important;
+        border-color: #dc3545 !important;
+      }
+
+      [data-theme="dark"] .alert-info .btn-outline-danger:hover {
+        background-color: #dc3545 !important;
+        color: #fff !important;
+      }
+
+      /* Separadores hr en tema dark */
+      [data-theme="dark"] hr {
+        border-color: var(--border-color) !important;
+        opacity: 0.5;
+      }
+
+      /* Pequeños textos en tema dark */
+      [data-theme="dark"] .small,
+      [data-theme="dark"] small {
+        color: var(--footer-text) !important;
+      }
+
+      /* Toques de color suave para tema light */
+      :root:not([data-theme="dark"]) .card:hover {
+        background-color: var(--card-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+        transition: all 0.2s ease;
+      }
+
+      :root:not([data-theme="dark"]) .alert {
+        background-color: var(--alert-bg);
+        border-left: 4px solid #0d6efd;
+      }
+
+      :root:not([data-theme="dark"]) .alert-success {
+        background-color: #f0f9f0;
+        border-left-color: #198754;
+      }
+
+      :root:not([data-theme="dark"]) .alert-info {
+        background-color: #f0f8ff;
+        border-left-color: #0dcaf0;
+      }
+
+      :root:not([data-theme="dark"]) .badge {
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      :root:not([data-theme="dark"]) .btn {
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        transition: all 0.2s ease;
+      }
+
+      :root:not([data-theme="dark"]) .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      }
+
+      :root:not([data-theme="dark"]) .form-control {
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+        transition: all 0.2s ease;
+      }
+
+      :root:not([data-theme="dark"]) .form-control:focus {
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05),
+          0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+      }
+
+      :root:not([data-theme="dark"]) .toast {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+      }
+
+      /* Ocultar barras de scroll pero mantener funcionalidad */
+      /* Para navegadores WebKit (Chrome, Safari, Edge) */
+      ::-webkit-scrollbar {
+        width: 0px;
+        height: 0px;
+        background: transparent;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: transparent;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      /* Para Firefox */
+      html {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+
+      /* Para todos los elementos con scroll */
+      * {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+
+      *::-webkit-scrollbar {
+        width: 0px;
+        height: 0px;
+        background: transparent;
+      }
+
+      /* Botón de tema fijo a 1.5rem de la derecha */
+      .theme-btn-fixed {
+        position: absolute !important;
+        right: 1.5rem !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        margin: 0 !important;
+        z-index: 1000 !important;
+      }
+
+      /* Botón de tema móvil (al lado del hamburguesa) */
+      .theme-btn-mobile {
+        position: relative !important;
+        right: auto !important;
+        top: auto !important;
+        transform: none !important;
+        margin: 0 !important;
+        padding: 0.5rem !important;
+        min-width: 40px !important;
+        height: 40px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-decoration: none !important;
+        border: none !important;
+        border-bottom: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+      }
+
+      .theme-btn-mobile:hover,
+      .theme-btn-mobile:focus,
+      .theme-btn-mobile:active {
+        text-decoration: none !important;
+        border: none !important;
+        border-bottom: none !important;
+        box-shadow: none !important;
+        outline: none !important;
+      }
+
+      /* En desktop, ocultar el botón móvil y mostrar el fijo */
+      @media (min-width: 992px) {
+        .theme-btn-mobile {
+          display: none !important;
+        }
+        
+        .theme-btn-fixed {
+          display: flex !important;
+        }
+      }
+
+      /* En móviles, ocultar el botón fijo y mostrar el móvil */
+      @media (max-width: 991.98px) {
+        .theme-btn-fixed {
+          display: none !important;
+        }
+        
+        .theme-btn-mobile {
+          display: flex !important;
+        }
+      }
+
+    </style>
+  </head>
+  <body x-data="appData()">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+      <div class="container">
+        <span class="navbar-brand">Flask HTMX SPA</span>
+
+        <!-- Contenedor para hamburguesa y tema en móviles -->
+        <div class="d-flex align-items-center">
+          <!-- Botón hamburguesa para móviles -->
+          <button
+            class="navbar-toggler me-3"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav"
+            aria-controls="navbarNav"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          
+          <!-- Botón de tema para móviles (al lado del hamburguesa) -->
+          <button
+            class="btn btn-link p-2 d-lg-none theme-btn-mobile"
+            @click="toggleTheme()"
+            :title="'Cambiar a tema ' + (user.preferences.theme === 'light' ? 'oscuro' : 'claro')"
+            style="border: none; color: white; font-size: 1.2em; margin: 0;"
+          >
+            <span x-show="user.preferences.theme === 'light'">🌙</span>
+            <span x-show="user.preferences.theme === 'dark'">☀️</span>
+          </button>
+        </div>
+
+        <!-- Contenido colapsable del navbar -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <div class="navbar-nav" style="margin-left: auto; padding-left: 1em">
+            <a class="nav-link me-lg-4" id="nav-home" onclick="goToHome()">
+              Home
+            </a>
+            <a
+              class="nav-link me-lg-4"
+              id="nav-inicio"
+              hx-get="/home"
+              hx-target="#main-content"
+              hx-push-url="true"
+              onclick="return setActiveNav('inicio')"
+            >
+              Inicio
+            </a>
+            <a
+              class="nav-link me-lg-4"
+              id="nav-about"
+              hx-get="/about"
+              hx-target="#main-content"
+              hx-push-url="true"
+              onclick="return setActiveNav('about')"
+            >
+              Acerca de
+            </a>
+            <a
+              class="nav-link me-lg-3"
+              id="nav-contact"
+              hx-get="/contact"
+              hx-target="#main-content"
+              hx-push-url="true"
+              onclick="return setActiveNav('contact')"
+            >
+              Contacto
+            </a>
+            <a
+              class="nav-link"
+              id="nav-ocr"
+              hx-get="/ocr"
+              hx-target="#main-content"
+              hx-push-url="true"
+              onclick="return setActiveNav('ocr')"
+            >
+              📸 OCR
+            </a>
+            
+            <!-- Botón de tema dentro del navbar -->
+            <button
+              class="btn btn-link nav-link p-2 ms-2 theme-btn-fixed"
+              @click="toggleTheme()"
+              :title="'Cambiar a tema ' + (user.preferences.theme === 'light' ? 'oscuro' : 'claro')"
+              style="border: none; color: white; font-size: 1.2em;"
+            >
+              <span x-show="user.preferences.theme === 'light'">🌙</span>
+              <span x-show="user.preferences.theme === 'dark'">☀️</span>
+            </button>
+          </div>
+
+          <!-- Indicador de carga global -->
+          <div class="htmx-indicator ms-3">
+            <div class="loading-spinner"></div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+
+
+    <!-- Contenido principal -->
+    <div class="container mt-4">
+      <div id="main-content">
+        <!-- Contenido inicial -->
+        <div class="row">
+          <div class="col-12">
+            <h1 class="mb-4" x-text="appConfig.name">
+              Bienvenido a Flask HTMX Alpine SPA
+            </h1>
+
+            <!-- Panel de notificaciones Alpine.js -->
+            <div
+              class="position-fixed end-0 p-3"
+              style="top: 80px; z-index: 1050"
+            >
+              <template
+                x-for="notification in notifications"
+                :key="notification.id"
+              >
+                <div class="toast show mb-2" role="alert">
+                  <div class="toast-header">
+                    <span
+                      class="badge me-2"
+                      :class="{
+                            'bg-success': notification.type === 'success',
+                            'bg-info': notification.type === 'info', 
+                            'bg-danger': notification.type === 'error'
+                          }"
+                      x-text="notification.type"
+                    ></span>
+                    <small x-text="notification.timestamp"></small>
+                    <button
+                      type="button"
+                      class="btn-close ms-auto"
+                      @click="removeNotification(notification.id)"
+                    ></button>
+                  </div>
+                  <div class="toast-body" x-text="notification.message"></div>
+                </div>
+              </template>
+            </div>
+
+            <!-- Demo de integración Flask + Alpine.js -->
+            <div class="row mb-4">
+              <div class="col-md-6">
+                <div class="card">
+                  <div class="card-header">
+                    <h5 class="mb-0">🔗 Datos de Flask → Alpine.js</h5>
+                  </div>
+                  <div class="card-body">
+                    <div class="mb-3">
+                      <label class="form-label">Usuario (desde Flask):</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        x-model="user.name"
+                        @input="updateUserName(user.name)"
+                      />
+                      <small class="text-muted"
+                        >Valor actual: <span x-text="user.name"></span
+                      ></small>
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="form-label">Email:</label>
+                      <input
+                        type="email"
+                        class="form-control"
+                        x-model="user.email"
+                        @input="updateUserEmail(user.email)"
+                      />
+                      <small class="text-muted"
+                        >Email: <span x-text="user.email"></span
+                      ></small>
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="form-label">Tema:</label>
+                      <button
+                        class="btn btn-outline-primary btn-sm"
+                        @click="toggleTheme()"
+                      >
+                        Cambiar tema:
+                        <span x-text="user.preferences.theme"></span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="card">
+                  <div class="card-header">
+                    <h5 class="mb-0">⚡ Variables reactivas Alpine.js</h5>
+                  </div>
+                  <div class="card-body">
+                    <div class="mb-3">
+                      <label class="form-label">Hora actual:</label>
+                      <div class="badge bg-info" x-text="currentTime"></div>
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="form-label">Contador:</label>
+                      <div class="d-flex align-items-center gap-2">
+                        <button
+                          class="btn btn-primary btn-sm"
+                          @click="incrementCounter()"
+                        >
+                          +
+                        </button>
+                        <span
+                          class="badge bg-secondary"
+                          x-text="counter"
+                        ></span>
+                        <button
+                          class="btn btn-danger btn-sm"
+                          @click="resetCounter()"
+                        >
+                          Reset
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="mb-3">
+                      <label class="form-label">Mensaje dinámico:</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        x-model="message"
+                        @input="updateMessage(message)"
+                        placeholder="Escribe algo..."
+                      />
+                      <small class="text-muted"
+                        >Escribiste: <span x-text="message"></span
+                      ></small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Estadísticas desde Flask con Alpine.js -->
+            <div class="row mb-4">
+              <div class="col-12">
+                <div class="card">
+                  <div
+                    class="card-header d-flex justify-content-between align-items-center"
+                  >
+                    <h5 class="mb-0">📊 Estadísticas (Flask + Alpine.js)</h5>
+                    <button
+                      class="btn btn-outline-success btn-sm"
+                      @click="syncWithServer()"
+                      :disabled="isLoading"
+                    >
+                      <span x-show="!isLoading">🔄 Sincronizar</span>
+                      <span x-show="isLoading">⏳ Sincronizando...</span>
+                    </button>
+                  </div>
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col-md-3 text-center">
+                        <div
+                          class="h3 text-primary"
+                          x-text="stats.users.toLocaleString()"
+                        >
+                          0
+                        </div>
+                        <div class="text-muted">Usuarios</div>
+                      </div>
+                      <div class="col-md-3 text-center">
+                        <div
+                          class="h3 text-success"
+                          x-text="'$' + stats.sales.toLocaleString()"
+                        >
+                          $0
+                        </div>
+                        <div class="text-muted">Ventas</div>
+                      </div>
+                      <div class="col-md-3 text-center">
+                        <div
+                          class="h3 text-warning"
+                          x-text="stats.orders.toLocaleString()"
+                        >
+                          0
+                        </div>
+                        <div class="text-muted">Pedidos</div>
+                      </div>
+                      <div class="col-md-3 text-center">
+                        <div
+                          class="h3 text-info"
+                          x-text="stats.visits.toLocaleString()"
+                        >
+                          0
+                        </div>
+                        <div class="text-muted">Visitas</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ejemplo tradicional con HTMX -->
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">🌐 Ejemplo tradicional HTMX</h5>
+                <p class="card-text">
+                  Esta sección demuestra HTMX tradicional para comparar con
+                  Alpine.js.
+                </p>
+
+                <button
+                  class="btn btn-success"
+                  hx-get="/api/data"
+                  hx-target="#api-response"
+                  hx-indicator="#loading"
+                  x-show="showApiButton"
+                  @click="showApiButton = false"
+                >
+                  Cargar datos de API
+                </button>
+
+                <div id="loading" class="htmx-indicator mt-2">
+                  <div class="loading-spinner"></div>
+                  Cargando...
+                </div>
+
+                <div id="api-response" class="mt-3"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-primary text-white mt-5 py-4">
+      <div class="container text-center">
+        <div class="d-flex justify-content-center align-items-center">
+          <p class="mb-0 me-3">&copy; 2025 Flask HTMX SPA. Construido con ❤️</p>
+          <button
+            class="btn btn-outline-light btn-sm rounded-circle"
+            onclick="scrollToTop()"
+            title="Volver arriba"
+            style="
+              width: 40px;
+              height: 40px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            "
+          >
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path
+                fill-rule="evenodd"
+                d="M8 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L7.5 2.707V14.5a.5.5 0 0 0 .5.5z"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Scripts adicionales -->
+    <script>
+      // Sobrescribir datos iniciales desde Flask/Jinja2 para Alpine.js
+      document.addEventListener('DOMContentLoaded', function() {
+        // Inyectar datos de Flask en Alpine.js
+        if (window.appData) {
+          const originalAppData = window.appData;
+          window.appData = function() {
+            const data = originalAppData();
+
+            // Sobrescribir con datos de Flask si están disponibles
+            {% if data %}
+            data.user = {{ data.user | tojson }};
+            data.stats = {{ data.stats | tojson }};
+            data.appConfig = {{ data.app_config | tojson }};
+            {% endif %}
+
+            // Agregar listener para cambiar showMailForm después del contact success
+            document.addEventListener("htmx:afterSettle", function (event) {
+                if (event.target.querySelector(".alert-success")) {
+                    // Cambiar showMailForm a false cuando aparezca mensaje de éxito
+                    const alpineElement = document.querySelector('[x-data]');
+                    if (alpineElement && alpineElement._x_dataStack && alpineElement._x_dataStack[0]) {
+                        alpineElement._x_dataStack[0].showMailForm = false;
+                        console.log("showMailForm cambiado a false desde index.html");
+                    }
+                }
+            });
+
+            return data;
+          };
+        }
+      });
+
+      // Variables globales para navegación
+      let currentPage = 'home'; // Home activo al cargar
+      let isNavigating = false; // Flag para evitar navegación múltiple
+
+      // Función para actualizar el estado activo basado en la URL
+      function updateActiveNavFromURL() {
+        const currentPath = window.location.pathname;
+        let targetPage = 'home';
+
+        // Determinar la página actual basada en la URL
+        if (currentPath.includes('/home') || currentPath.includes('/inicio')) {
+          targetPage = 'inicio';
+        } else if (currentPath.includes('/about')) {
+          targetPage = 'about';
+        } else if (currentPath.includes('/contact')) {
+          targetPage = 'contact';
+        } else if (currentPath.includes('/ocr')) {
+          targetPage = 'ocr';
+        } else {
+          targetPage = 'home'; // Default para la página raíz
+        }
+
+        // Actualizar el estado visual de la navegación
+        document.querySelectorAll('.nav-link').forEach(link => {
+          link.classList.remove('active', 'disabled');
+        });
+
+        const targetNav = document.getElementById(`nav-${targetPage}`);
+        if (targetNav) {
+          targetNav.classList.add('active', 'disabled');
+          currentPage = targetPage;
+          console.log(`🔄 Estado activo actualizado a: ${targetPage} (desde URL)`);
+        }
+      }
+
+      // Manejar navegación con flechas del navegador
+      window.addEventListener('popstate', function(event) {
+        console.log('🔙 Navegación del historial detectada');
+
+        // Actualizar el estado activo basado en la nueva URL
+        setTimeout(() => {
+          updateActiveNavFromURL();
+        }, 100);
+      });
+
+      // Función para ir a Home (página inicial)
+      function goToHome() {
+        // Si ya estamos en Home, no hacer nada
+        if (currentPage === 'home') {
+          console.log('Ya estás en Home');
+          return false;
+        }
+
+        // Recargar la página completa para volver al estado inicial
+        window.location.href = '/';
+        console.log('Recargando página para ir a Home');
+      }
+
+      // Función para establecer navegación activa
+      function setActiveNav(page) {
+        console.log(`Navegando a: ${page}`);
+        currentPage = page;
+        return true;
+      }
+
+      // Función para scroll suave hacia arriba con FluidScroll
+      function scrollToTop() {
+        fluidScroll({
+          yPos: "start",
+          easing: "easeOutQuart",
+          duration: 1500
+        });
+        console.log('🔝 Scroll to top ejecutado con FluidScroll');
+      }
+
+      // Configuración global de HTMX
+      document.addEventListener("DOMContentLoaded", function () {
+        // Scroll suave hacia arriba al cargar la página
+        if (typeof fluidScroll !== "undefined") {
+          fluidScroll({
+            yPos: "start",
+            easing: "easeOutQuart",
+            duration: 200,
+          });
+          console.log('🔝 Scroll inicial ejecutado al cargar página');
+        }
+
+        // Al cargar: Todos enabled, Home activo + disabled
+        currentPage = 'home';
+        document.querySelectorAll('.nav-link').forEach(link => {
+          link.classList.remove('active', 'disabled');
+        });
+        document.getElementById('nav-home').classList.add('active', 'disabled');
+        isNavigating = false;
+        // Configurar HTMX para manejar errores
+        document.body.addEventListener("htmx:responseError", function (evt) {
+          console.error("Error HTMX:", evt.detail);
+          alert("Error al cargar el contenido. Por favor, intenta de nuevo.");
+        });
+
+        // Manejar estados de navegación antes de cada petición HTMX (solo para navegación)
+        document.body.addEventListener("htmx:beforeRequest", function (evt) {
+          const element = evt.detail.elt;
+
+          // Solo aplicar lógica de navegación a elementos .nav-link
+          if (!element.classList.contains('nav-link')) {
+            return; // Permitir que otros elementos HTMX funcionen normalmente
+          }
+
+          // Si el elemento de navegación ya está disabled, cancelar la petición
+          if (element.classList.contains('disabled')) {
+            console.log('Petición HTMX cancelada - elemento de navegación ya activo:', element.id);
+            evt.preventDefault();
+            return false;
+          }
+
+          // Habilitar todos los enlaces de navegación
+          document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active', 'disabled');
+          });
+
+          // Deshabilitar solo el enlace de navegación que se está pulsando
+          element.classList.add('active', 'disabled');
+
+          console.log('Navegación iniciada - elemento activo:', element.id);
+        });
+
+        // Configurar indicadores de carga
+        document.body.addEventListener("htmx:beforeRequest", function (evt) {
+          console.log("Iniciando petición HTMX...");
+        });
+
+        document.body.addEventListener("htmx:afterRequest", function (evt) {
+          console.log("Petición HTMX completada");
+        });
+
+        // Reinicializar Alpine.js en contenido cargado dinámicamente
+        document.body.addEventListener("htmx:afterSwap", function (evt) {
+          // Buscar elementos con x-data en el nuevo contenido
+          const alpineElements = evt.detail.target.querySelectorAll('[x-data]');
+          alpineElements.forEach(el => {
+            if (window.Alpine) {
+              Alpine.initTree(el);
+            }
+          });
+
+          // Rehabilitar navegación después del swap
+          setTimeout(() => {
+            isNavigating = false;
+            // NO quitar disabled del enlace activo - debe permanecer disabled
+            console.log(`Navegación completada a: ${currentPage}`);
+          }, 100);
+        });
+      });
+
+     
+    </script>
+
+    <!-- Modal de Instalación PWA -->
+    <div id="pwa-install-modal" class="pwa-modal-overlay" style="display: none;">
+      <div class="pwa-modal">
+        <div class="pwa-modal-header">
+          <h5 class="mb-0">📱 Instalar Aplicación</h5>
+          <button class="pwa-close-btn" onclick="closePWAModal()">❌</button>
+        </div>
+        <div class="pwa-modal-body">
+          <div class="text-center mb-3">
+            <div class="pwa-app-icon">📸</div>
+            <h6>Flask HTMX SPA</h6>
+            <p class="text-muted">Instala la aplicación para un acceso más rápido y funciones offline</p>
+          </div>
+          
+          <div class="pwa-features mb-3">
+            <div class="pwa-feature">
+              <span class="pwa-feature-icon">⚡</span>
+              <span>Acceso rápido desde tu pantalla de inicio</span>
+            </div>
+            <div class="pwa-feature">
+              <span class="pwa-feature-icon">📱</span>
+              <span>Experiencia de aplicación nativa</span>
+            </div>
+            <div class="pwa-feature">
+              <span class="pwa-feature-icon">🔒</span>
+              <span>Funciona sin conexión</span>
+            </div>
+          </div>
+          
+          <div class="d-grid gap-2">
+            <button class="btn btn-primary btn-lg" onclick="installPWA()">
+              📱 Instalar Ahora
+            </button>
+            <button class="btn btn-outline-secondary" onclick="closePWAModal()">
+              Ahora no
+            </button>
+          </div>
+          
+          <!-- Instrucciones manuales para Android -->
+          <div id="manual-install-instructions" class="mt-3" style="display: none;">
+            <hr>
+            <small class="text-muted">
+              <strong>Para instalar manualmente:</strong><br>
+              1. Toca el menú del navegador (⋮)<br>
+              2. Selecciona "Agregar a pantalla de inicio"<br>
+              3. Confirma la instalación
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <style>
+    .pwa-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      backdrop-filter: blur(4px);
+      animation: pwaModalFadeIn 0.3s ease-out;
+    }
+
+    @keyframes pwaModalFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .pwa-modal {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      max-width: 400px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: pwaModalSlideIn 0.3s ease-out;
+    }
+
+    @keyframes pwaModalSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .pwa-modal-header {
+      padding: 1.5rem 1.5rem 1rem;
+      border-bottom: 1px solid #dee2e6;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .pwa-close-btn {
+      background: none;
+      border: none;
+      font-size: 1.2em;
+      cursor: pointer;
+      color: #6c757d;
+      padding: 0.25rem;
+      border-radius: 4px;
+      transition: background-color 0.2s ease;
+    }
+
+    .pwa-close-btn:hover {
+      background: #f8f9fa;
+    }
+
+    .pwa-modal-body {
+      padding: 1.5rem;
+    }
+
+    .pwa-app-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+
+    .pwa-features {
+      text-align: left;
+    }
+
+    .pwa-feature {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      font-size: 0.9rem;
+    }
+
+    .pwa-feature-icon {
+      font-size: 1.2rem;
+      margin-right: 0.75rem;
+      width: 1.5rem;
+      text-align: center;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .pwa-modal {
+        background: #2d3748;
+        color: white;
+      }
+      
+      .pwa-modal-header {
+        border-bottom-color: #4a5568;
+      }
+      
+      .pwa-close-btn:hover {
+        background: #4a5568;
+      }
+    }
+    </style>
+
+    <script>
+    // Variables PWA ahora gestionadas por Alpine.store('pwa')
+
+    // Detectar cuando la app se puede instalar
+    window.addEventListener('beforeinstallprompt', (e) => {
+      console.log('💾 PWA: App puede ser instalada');
+      e.preventDefault();
+      if (window.Alpine && Alpine.store('pwa')) {
+        Alpine.store('pwa').setDeferredPrompt(e);
+      }
+      // Mostrar modal después de un breve delay si es Android
+      if (isAndroidDevice() && window.Alpine && Alpine.store('pwa') && !Alpine.store('pwa').pwaModalShown) {
+        setTimeout(() => {
+          showPWAModal();
+        }, 3000); // Mostrar después de 3 segundos
+      }
+    });
+
+    // Detectar Android
+    function isAndroidDevice() {
+      return /Android/i.test(navigator.userAgent);
+    }
+
+    // Mostrar modal PWA
+    function showPWAModal() {
+      if (!(window.Alpine && Alpine.store('pwa'))) return;
+      if (Alpine.store('pwa').pwaModalShown) return;
+      Alpine.store('pwa').setPwaModalShown(true);
+      document.getElementById('pwa-install-modal').style.display = 'flex';
+      // Si no hay deferredPrompt, mostrar instrucciones manuales
+      if (!Alpine.store('pwa').deferredPrompt && isAndroidDevice()) {
+        document.getElementById('manual-install-instructions').style.display = 'block';
+      }
+    }
+
+    // Cerrar modal PWA
+    function closePWAModal() {
+      document.getElementById('pwa-install-modal').style.display = 'none';
+    }
+
+    // Instalar PWA
+    function installPWA() {
+      if (window.Alpine && Alpine.store('pwa') && Alpine.store('pwa').deferredPrompt) {
+        Alpine.store('pwa').deferredPrompt.prompt();
+        Alpine.store('pwa').deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('✅ Usuario aceptó instalar la PWA');
+            if (window.Alpine && Alpine.store('app')) {
+              Alpine.store('app').addNotification('¡App instalada correctamente!', 'success');
+            }
+          } else {
+            console.log('❌ Usuario rechazó instalar la PWA');
+          }
+          Alpine.store('pwa').clearDeferredPrompt();
+          closePWAModal();
+        });
+      } else {
+        document.getElementById('manual-install-instructions').style.display = 'block';
+        if (isAndroidDevice()) {
+          if (window.Alpine && Alpine.store('app')) {
+            Alpine.store('app').addNotification('Usa el menú del navegador para instalar', 'info');
+          }
+        }
+      }
+    }
+
+    // Detectar cuando la app ya está instalada
+    window.addEventListener('appinstalled', (evt) => {
+      console.log('✅ PWA instalada exitosamente');
+      closePWAModal();
+      if (window.Alpine && Alpine.store('app')) {
+        Alpine.store('app').addNotification('¡App instalada! Ya puedes usarla desde tu pantalla de inicio', 'success');
+      }
+    });
+
+    // Cerrar modal al hacer clic fuera
+    document.addEventListener('click', (e) => {
+      const modal = document.getElementById('pwa-install-modal');
+      if (e.target === modal) {
+        closePWAModal();
+      }
+    });
+
+    // Función para mostrar modal manualmente (para testing)
+    function showPWAModalManually() {
+      if (window.Alpine && Alpine.store('pwa')) {
+        Alpine.store('pwa').setPwaModalShown(false);
+      }
+      showPWAModal();
+    }
+
+    console.log('🚀 PWA: Sistema de instalación cargado');
+    </script>
+  </body>
+</html>

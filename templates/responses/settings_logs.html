@@ -1,0 +1,22 @@
+<div class="card">
+  <div class="card-header">
+    <small>Últimos logs del sistema</small>
+  </div>
+  <div class="card-body">
+    <pre class="small">{{ logs }}</pre>
+  </div>
+</div>
+
+<script>
+  // Ejecutar FluidScroll después de que HTMX termine completamente
+  document.addEventListener("htmx:afterSettle", function (event) {
+    // Verificar si el contenido cargado contiene logs
+    if (event.target.querySelector("pre")) {
+      fluidScroll({
+        yPos: 600,
+        duration: 700,
+      });
+      console.log("FluidScroll ejecutado después de settle de logs");
+    }
+  });
+</script>

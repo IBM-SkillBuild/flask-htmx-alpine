@@ -1,0 +1,214 @@
+<div
+  class="alert alert-success"
+  id="ocr-result-container"
+  style="min-height: 70vh"
+>
+  <div class="d-flex justify-content-between align-items-start mb-3">
+    <h5 class="mb-0">✅ Texto extraído exitosamente</h5>
+    <button class="btn btn-sm btn-outline-secondary" onclick="closeOcrResult()">
+      ❌
+    </button>
+  </div>
+
+  <div class="row">
+    <div class="col-md-8" style="min-height: 70vh">
+      <div class="mb-3">
+        <label style="font-weight: bold; margin-bottom: 0.5em; display: block"
+          >📝 Texto extraído:</label
+        >
+        <textarea id="extracted-text-result" class="auto-expand" rows="1">
+{{ text }}</textarea
+        >
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h6>📊 Información del procesamiento</h6>
+          <hr />
+          <p class="mb-2">
+            <strong>📁 Archivo:</strong><br />
+            <small class="text-muted">{{ filename }}</small>
+          </p>
+          <p class="mb-2">
+            <strong>🌍 Idioma:</strong><br />
+            <small class="text-muted">{{ language }}</small>
+          </p>
+          <p class="mb-3">
+            <strong>🎯 Confianza:</strong><br />
+            <span class="badge bg-success">{{ confidence }}%</span>
+          </p>
+
+          <div class="d-grid gap-2">
+            <button class="btn btn-primary btn-sm" onclick="copyOcrText()">
+              📋 Copiar texto
+            </button>
+            <button
+              class="btn btn-outline-success btn-sm"
+              onclick="downloadOcrText()"
+            >
+              💾 Descargar
+            </button>
+            <button
+              class="btn btn-outline-info btn-sm"
+              onclick="saveToHistory()"
+            >
+              📚 Guardar en historial
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function autoResizeOcrTextArea(textArea) {
+    // Reset height to auto to get the correct scrollHeight
+    textArea.style.height = 'auto';
+
+    // Set height based on content, with minimum height
+    const newHeight = Math.max(textArea.scrollHeight, 120);
+    textArea.style.height = newHeight + 'px';
+  }
+
+  function initOcrTextAreaAutoResize() {
+    const textArea = document.getElementById('extracted-text-result');
+    if (textArea) {
+      // Asegurar que el valor esté en el textarea
+      if (!textArea.value && textArea.textContent) {
+        textArea.value = textArea.textContent.trim();
+      }
+
+      // Aplicar auto-resize inmediatamente
+      setTimeout(() => {
+        autoResizeOcrTextArea(textArea);
+      }, 50);
+
+      // Agregar event listeners
+      textArea.addEventListener('input', function() {
+        autoResizeOcrTextArea(this);
+      });
+      textArea.addEventListener('paste', function() {
+        setTimeout(() => autoResizeOcrTextArea(this), 10);
+      });
+    }
+  }
+
+  // Ejecutar tras cada settle de HTMX y al cargar el DOM
+  document.addEventListener("htmx:afterSettle", function() {
+    setTimeout(initOcrTextAreaAutoResize, 100);
+  });
+  document.addEventListener("DOMContentLoaded", initOcrTextAreaAutoResize);
+
+  // También ejecutar inmediatamente si el script se carga después del DOM
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initOcrTextAreaAutoResize);
+  } else {
+    setTimeout(initOcrTextAreaAutoResize, 100);
+  }
+
+  function copyOcrText() {
+    const textArea = document.getElementById('extracted-text-result');
+    if (textArea) {
+      textArea.select();
+      document.execCommand('copy');
+
+      // Notificar
+      const appElement = document.querySelector('[x-data]');
+      if (appElement && appElement._x_dataStack && appElement._x_dataStack[0]) {
+        appElement._x_dataStack[0].addNotification('Texto copiado al portapapeles', 'success');
+      }
+    }
+  }
+
+  function downloadOcrText() {
+    const textArea = document.getElementById('extracted-text-result');
+    if (textArea) {
+      const blob = new Blob([textArea.value], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ocr-texto-${Date.now()}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      // Notificar
+      const appElement = document.querySelector('[x-data]');
+      if (appElement && appElement._x_dataStack && appElement._x_dataStack[0]) {
+        appElement._x_dataStack[0].addNotification('Archivo descargado', 'success');
+      }
+    }
+  }
+
+  function saveToHistory() {
+    const textArea = document.getElementById('extracted-text-result');
+    if (textArea) {
+      const historyItem = {
+        id: Date.now(),
+        text: textArea.value,
+        language: '{{ language }}',
+        confidence: {{ confidence }},
+        filename: '{{ filename }}',
+        timestamp: new Date().toLocaleString()
+      };
+
+      // Guardar en localStorage
+      let history = JSON.parse(localStorage.getItem('ocr-history') || '[]');
+      history.unshift(historyItem);
+
+      // Mantener solo los últimos 10
+      if (history.length > 10) {
+        history = history.slice(0, 10);
+      }
+
+      localStorage.setItem('ocr-history', JSON.stringify(history));
+
+      // Notificar
+      const appElement = document.querySelector('[x-data]');
+      if (appElement && appElement._x_dataStack && appElement._x_dataStack[0]) {
+        appElement._x_dataStack[0].addNotification('Guardado en historial', 'info');
+      }
+    }
+  }
+
+  function closeOcrResult() {
+    const container = document.getElementById('ocr-results');
+    if (container) {
+      container.innerHTML = '';
+    }
+
+    // Mostrar formulario nuevamente
+    const appElement = document.querySelector('[x-data]');
+    if (appElement && appElement._x_dataStack && appElement._x_dataStack[0]) {
+      appElement._x_dataStack[0].showOcrForm = true;
+    }
+  }
+</script>
+<style>
+  textarea.auto-expand {
+    width: 100%;
+    font-size: 1.1rem;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid #888;
+    border-radius: 8px;
+    background: #fff;
+    color: #222;
+    height: auto !important;
+    min-height: 120px !important;
+    max-height: none !important;
+    overflow-y: hidden !important;
+    resize: vertical !important;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s;
+    line-height: 1.5;
+  }
+  textarea.auto-expand:focus {
+    border-color: #0d6efd;
+    background: #f8f9fa;
+  }
+</style>

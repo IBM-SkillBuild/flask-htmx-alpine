@@ -1,0 +1,174 @@
+<div class="row">
+  <div class="col-12">
+    <h1 class="mb-4">Acerca de</h1>
+
+    <div class="row">
+      <div class="col-lg-8">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Sobre esta aplicación</h5>
+            <p class="card-text">
+              Esta es una aplicación de una sola página (SPA) construida con
+              tecnologías modernas y eficientes:
+            </p>
+
+            <div class="row mt-4">
+              <div class="col-md-6">
+                <h6>🐍 Backend</h6>
+                <ul class="list-unstyled">
+                  <li>• Flask (Python)</li>
+                  <li>• Jinja2 Templates</li>
+                  <li>• RESTful APIs</li>
+                </ul>
+              </div>
+
+              <div class="col-md-6">
+                <h6>🌐 Frontend</h6>
+                <ul class="list-unstyled">
+                  <li>• HTMX para interactividad</li>
+                  <li>• Alpine.js para reactividad</li>
+                  <li>• Bootstrap 5</li>
+                  <li>• FluidScroll para animaciones</li>
+                </ul>
+              </div>
+            </div>
+
+            <hr />
+
+            <h6>✨ Características principales</h6>
+            <div class="row">
+              <div class="col-sm-6">
+                <ul class="list-unstyled">
+                  <li>✅ Navegación sin recarga</li>
+                  <li>✅ Carga dinámica de contenido</li>
+                  <li>✅ Indicadores de carga</li>
+                  <li>✅ Persistencia con localStorage</li>
+                  <li>✅ Tema dark/light</li>
+                </ul>
+              </div>
+              <div class="col-sm-6">
+                <ul class="list-unstyled">
+                  <li>✅ Diseño responsivo</li>
+                  <li>✅ Scroll suave (FluidScroll)</li>
+                  <li>✅ Notificaciones reactivas</li>
+                  <li>✅ Formulario de contacto</li>
+                  <li>✅ Guardado automático</li>
+                </ul>
+              </div>
+            </div>
+
+            <hr />
+
+            <h6>🔧 Arquitectura técnica</h6>
+            <p class="small text-muted">
+              <strong>HTMX + Alpine.js:</strong> Combinación perfecta para crear
+              una SPA moderna sin frameworks pesados. HTMX maneja las peticiones
+              al servidor y la navegación, mientras que Alpine.js proporciona
+              reactividad y gestión de estado en el cliente.
+            </p>
+            <p class="small text-muted">
+              <strong>Persistencia:</strong> Pra pequeñas cosas, parte del estado de la aplicación se guarda en
+              localStorage, proporcionando una experiencia fluida entre sesiones.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div
+          class="card"
+          x-data="{ 
+                    showDetails: false, 
+                    detailsLoaded: false,
+                    isLoading: false,
+                    async loadSystemInfo() {
+                        if (!this.detailsLoaded) {
+                            this.isLoading = true;
+                            
+                            try {
+                                const response = await fetch('/system-info');
+                                if (!response.ok) {
+                                    throw new Error('Error del servidor');
+                                }
+                                const html = await response.text();
+                                document.getElementById('system-info-content').innerHTML = html;
+                                this.detailsLoaded = true;
+                            } catch (error) {
+                                // Cargar template de error desde el servidor
+                                const errorResponse = await fetch('/system-error');
+                                const errorHtml = await errorResponse.text();
+                                document.getElementById('system-info-content').innerHTML = errorHtml;
+                                this.detailsLoaded = true;
+                            } finally {
+                                this.isLoading = false;
+                            }
+                        }
+                    }
+                }"
+        >
+          <div class="card-header">
+            <h6 class="mb-0">Información del sistema</h6>
+          </div>
+          <div class="card-body">
+            <!-- Botón para mostrar -->
+            <button
+              class="btn btn-outline-primary btn-sm w-100"
+              x-show="!showDetails"
+              :disabled="isLoading"
+              @click="showDetails = !showDetails; if (!detailsLoaded) loadSystemInfo()"
+            >
+              <span x-show="!isLoading">Ver detalles del sistema</span>
+              <span x-show="isLoading">
+                <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                Cargando...
+              </span>
+            </button>
+
+            <!-- Botón para ocultar -->
+            <button
+              class="btn btn-outline-secondary btn-sm w-100"
+              x-show="showDetails"
+              :disabled="isLoading"
+              @click="showDetails = !showDetails"
+            >
+              Ocultar detalles
+            </button>
+
+            <div
+              id="system-details"
+              class="mt-3"
+              x-show="showDetails"
+              x-transition:enter="transition ease-out duration-300"
+              x-transition:enter-start="opacity-0 transform translate-y-2"
+              x-transition:enter-end="opacity-100 transform translate-y-0"
+              x-transition:leave="transition ease-in duration-200"
+              x-transition:leave-start="opacity-100 transform translate-y-0"
+              x-transition:leave-end="opacity-0 transform translate-y-2"
+            >
+              <div x-show="isLoading" class="text-muted small">
+                <div class="d-flex align-items-center">
+                  <div
+                    class="spinner-border spinner-border-sm me-2"
+                    role="status"
+                  ></div>
+                  Cargando información del sistema...
+                </div>
+              </div>
+              <div id="system-info-content"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mt-3">
+          <div class="card-body text-center">
+            <h6>🚀 Versión</h6>
+            <span class="badge bg-primary">v1.0.0</span>
+            <p class="small text-muted mt-2">
+              Última actualización: Julio 2025
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

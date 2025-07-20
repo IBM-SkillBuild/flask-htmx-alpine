@@ -1,0 +1,246 @@
+<div class="row" style="min-height: 100vh;" id="ocr-container" x-data="ocrData()">
+  <div class="col-12">
+    <h1 class="mb-4">📸 Extractor de Texto (OCR)</h1>
+    <p class="text-muted mb-4">
+      Sube una imagen y extrae automáticamente el texto que contiene usando tecnología OCR en el servidor.
+    </p>
+
+    <!-- Formulario OCR -->
+    <div id="ocr-form">
+      <form 
+        id="ocr-upload-form"
+        hx-post="/ocr/process"
+        hx-target="#ocr-results"
+        hx-swap="innerHTML"
+        enctype="multipart/form-data"
+        class="mb-0"
+      >
+        <div class="row">
+          <!-- Sección de carga de imagen -->
+          <div class="col-lg-8 mb-4">
+            <div class="card">
+              <div class="card-header">
+                <h5 class="mb-0">📤 Subir Imagen</h5>
+              </div>
+              <div class="card-body">
+                <!-- Zona de drag & drop y vista previa -->
+                <div 
+                  class="upload-zone mb-3"
+                  id="upload-zone"
+                  :class="{ 'dragover': isDragOver }"
+                  @click="handleUploadClick"
+                  @dragover.prevent="isDragOver = true"
+                  @dragleave.prevent="isDragOver = false"
+                  @drop.prevent="handleDrop"
+                  style="border: 2px dashed #dee2e6; border-radius: 12px; padding: 2rem; text-align: center; cursor: pointer; background: #f8f9fa; min-height: 200px; display: flex; align-items: center; justify-content: center;"
+                >
+                  <template x-if="!selectedImage">
+                    <div class="upload-content" id="upload-content">
+                      <div class="upload-icon">📸</div>
+                      <h6 id="upload-title">Arrastra una imagen aquí</h6>
+                      <p class="text-muted" id="upload-subtitle">o haz clic para seleccionar</p>
+                      <small class="text-muted">Formatos: JPG, PNG, GIF, BMP</small>
+                    </div>
+                  </template>
+                  <template x-if="selectedImage">
+                    <div id="image-preview" class="image-preview mb-3">
+                      <img id="preview-img" alt="Vista previa" class="preview-img" :src="selectedImage">
+                      <div class="image-info mt-2">
+                        <small class="text-muted" id="image-info" x-text="imageInfo"></small>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+                <input 
+                  type="file" 
+                  id="file-input"
+                  name="image"
+                  accept="image/*"
+                  class="form-control"
+                  x-ref="fileInput"
+                  style="display:none;"
+                  @change="handleFileSelect"
+                  required
+                >
+                <input 
+                  type="file" 
+                  id="camera-input"
+                  name="image"
+                  accept="image/*"
+                  capture="environment"
+                  class="form-control"
+                  x-ref="cameraInput"
+                  style="display:none;"
+                  @change="handleFileSelect"
+                >
+                <div class="row mt-3">
+                  <div class="col-md-6">
+                    <label class="form-label">🌍 Idioma:</label>
+                    <select class="form-select form-select-sm" id="language-select" name="language" x-model="selectedLanguage">
+                      <option value="spa">Español</option>
+                      <option value="eng">Inglés</option>
+                      <option value="fra">Francés</option>
+                      <option value="deu">Alemán</option>
+                      <option value="ita">Italiano</option>
+                      <option value="por">Portugués</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6 d-flex align-items-end">
+                    <button 
+                      type="submit"
+                      class="btn btn-primary btn-sm w-100"
+                      id="process-btn"
+                      :disabled="!selectedImage"
+                    >
+                      🔄 Procesar con OCR
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sección de acciones rápidas -->
+          <div class="col-lg-4 mb-4">
+            <div class="card">
+              <div class="card-header">
+                <h6 class="mb-0">⚡ Acciones rápidas</h6>
+              </div>
+              <div class="card-body">
+                <div class="d-grid gap-2">
+                  <button 
+                    type="button"
+                    class="btn btn-outline-secondary btn-sm"
+                    @click="clearForm"
+                  >
+                    🗑️ Limpiar formulario
+                  </button>
+                  <hr>
+                  <div class="text-center">
+                    <small class="text-muted">
+                      💡 Tip: Arrastra imágenes directamente o usa cámara/galería
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Área de resultados -->
+    <div id="ocr-results" class="mt-4"></div>
+
+    <!-- Modal para dispositivos móviles -->
+    <div id="mobile-modal" class="modal-overlay" style="display: none;" @click="closeMobileModal">
+      <div class="mobile-modal" @click.stop>
+        <div class="modal-header">
+          <h6 class="mb-0">📸 Seleccionar Imagen</h6>
+          <button class="btn-close-modal" @click="closeMobileModal">❌</button>
+        </div>
+        <div class="modal-body">
+          <p class="text-muted mb-3">¿Cómo quieres obtener la imagen?</p>
+          <div class="d-grid gap-3">
+            <button class="btn btn-primary btn-lg" @click="selectCamera">📷 Desde Cámara</button>
+            <button class="btn btn-outline-primary btn-lg" @click="selectGallery">🖼️ Desde Galería</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.upload-zone {
+  border: 2px dashed #dee2e6;
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.upload-zone.dragover {
+  border-color: #0d6efd;
+  background: rgba(13, 110, 253, 0.1);
+  transform: scale(1.02);
+}
+.upload-content {
+  text-align: center;
+}
+.upload-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+.image-preview {
+  max-width: 100%;
+  text-align: center;
+}
+.preview-img {
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.image-info {
+  text-align: center;
+}
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+  animation: modalFadeIn 0.3s ease-out;
+}
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.mobile-modal {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  max-width: 320px;
+  width: 90%;
+  animation: modalSlideIn 0.3s ease-out;
+}
+@keyframes modalSlideIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.modal-header {
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid #dee2e6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.btn-close-modal {
+  background: none;
+  border: none;
+  font-size: 1.2em;
+  cursor: pointer;
+  color: #6c757d;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+.btn-close-modal:hover {
+  background: #f8f9fa;
+}
+.modal-body {
+  padding: 1.5rem;
+}
+</style>

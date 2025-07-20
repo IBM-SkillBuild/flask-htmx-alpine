@@ -1,0 +1,14 @@
+<h3>¡Gracias por contactarnos, {{ name }}!</h3>
+<p>Hemos recibido tu mensaje y te responderemos pronto.</p>
+
+<h4>Resumen de tu mensaje:</h4>
+<p><strong>Asunto:</strong> {{ subject or 'Sin asunto' }}</p>
+<p><strong>Mensaje:</strong></p>
+<div style="background-color: #f8f9fa; padding: 15px; border-left: 4px solid #28a745; margin: 10px 0;">
+    {{ message_html | safe }}
+</div>
+
+<p>Nuestro equipo revisará tu mensaje y te contactaremos dentro de las próximas 24-48 horas.</p>
+
+<hr>
+<p><small>Este es un email automático, por favor no respondas a este mensaje.</small></p>

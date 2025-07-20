@@ -1,0 +1,78 @@
+<div class="card">
+  <div class="card-body">
+    <div class="alert alert-success">
+      <h6>¡Mensaje enviado exitosamente!</h6>
+      <p class="mb-1">
+        Gracias <strong>{{ name }}</strong>, hemos recibido tu mensaje.
+      </p>
+      <p class="mb-0">
+        <small
+          >✅ Email enviado a: {{ contact_email }}<br />
+          ✅ Confirmación enviada a: {{ email }}</small
+        >
+      </p>
+
+      <hr />
+
+      <div class="d-grid">
+        <button class="btn btn-primary" onclick="sendAnotherMessage()">
+          📧 Enviar otro mensaje
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Función para enviar otro mensaje (corregida)
+  function sendAnotherMessage() {
+    // Limpiar el estado de éxito guardado
+    sessionStorage.removeItem("contactSuccess");
+    sessionStorage.removeItem("contactSuccessContent");
+
+    // Limpiar el contenido del mensaje de éxito
+    const contactResponse = document.getElementById("contact-response");
+    if (contactResponse) {
+      contactResponse.innerHTML = "";
+    }
+
+    // Mostrar de nuevo el formulario usando Alpine store correctamente
+    if (Alpine.store("contact")) {
+      Alpine.store("contact").showForm();
+    }
+    console.log("Formulario de contacto mostrado nuevamente");
+
+    // Scroll suave hacia el formulario sin interferir con el footer
+    setTimeout(() => {
+      const mailForm = document.getElementById("mail");
+      if (mailForm && typeof fluidScroll !== "undefined") {
+        fluidScroll({
+          yPos: "start",
+          easing: "easeOutQuart",
+          duration: 800,
+        });
+        console.log("Scroll suave hacia el formulario de contacto");
+      }
+    }, 200);
+  }
+
+  // Manejar el éxito del contacto sin interferir con FluidScroll del footer
+  document.addEventListener("htmx:afterSettle", function (event) {
+    // Verificar si el contenido insertado es el mensaje de éxito
+    if (event.target.querySelector(".alert-success")) {
+      // Guardar el estado de éxito en sessionStorage
+      sessionStorage.setItem("contactSuccess", "true");
+      sessionStorage.setItem("contactSuccessContent", event.target.innerHTML);
+
+      // Ocultar formulario usando Alpine store correctamente
+      if (Alpine.store("contact")) {
+        Alpine.store("contact").hideForm();
+      }
+      console.log("Formulario de contacto ocultado");
+
+      // NO hacer scroll automático para evitar interferir con el footer
+      // El usuario puede hacer scroll manualmente si lo desea
+      console.log("Mensaje de éxito mostrado - sin scroll automático");
+    }
+  });
+</script>

@@ -1,0 +1,251 @@
+<div class="row">
+  <div class="col-12">
+    <h1 class="mb-4">Configuración</h1>
+
+    <div class="row">
+      <div class="col-lg-8">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">Configuración general</h5>
+          </div>
+          <div class="card-body">
+            <form
+              hx-post="/settings/save"
+              hx-target="#settings-response"
+              hx-indicator="#settings-loading"
+            >
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label for="app-name" class="form-label"
+                      >Nombre de la aplicación</label
+                    >
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="app-name"
+                      name="app_name"
+                      value="Flask HTMX SPA"
+                    />
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label for="language" class="form-label">Idioma</label>
+                    <select class="form-select" id="language" name="language">
+                      <option value="es" selected>Español</option>
+                      <option value="en">English</option>
+                      <option value="fr">Français</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label for="theme" class="form-label">Tema</label>
+                    <select class="form-select" id="theme" name="theme">
+                      <option value="light" selected>Claro</option>
+                      <option value="dark">Oscuro</option>
+                      <option value="auto">Automático</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label for="timezone" class="form-label"
+                      >Zona horaria</label
+                    >
+                    <select class="form-select" id="timezone" name="timezone">
+                      <option value="America/Mexico_City" selected>
+                        México (GMT-6)
+                      </option>
+                      <option value="America/New_York">
+                        Nueva York (GMT-5)
+                      </option>
+                      <option value="Europe/Madrid">Madrid (GMT+1)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <hr />
+
+              <h6>Notificaciones</h6>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-check mb-2">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="email-notifications"
+                      name="email_notifications"
+                      checked
+                    />
+                    <label class="form-check-label" for="email-notifications">
+                      Notificaciones por email
+                    </label>
+                  </div>
+
+                  <div class="form-check mb-2">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="push-notifications"
+                      name="push_notifications"
+                    />
+                    <label class="form-check-label" for="push-notifications">
+                      Notificaciones push
+                    </label>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="form-check mb-2">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="sms-notifications"
+                      name="sms_notifications"
+                    />
+                    <label class="form-check-label" for="sms-notifications">
+                      Notificaciones SMS
+                    </label>
+                  </div>
+
+                  <div class="form-check mb-2">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="marketing-emails"
+                      name="marketing_emails"
+                    />
+                    <label class="form-check-label" for="marketing-emails">
+                      Emails de marketing
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <hr />
+
+              <div class="d-flex justify-content-between">
+                <button type="submit" class="btn btn-primary">
+                  Guardar cambios
+                </button>
+
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  hx-get="/settings/reset"
+                  hx-target="#settings-response"
+                >
+                  Restablecer
+                </button>
+              </div>
+
+              <div id="settings-loading" class="htmx-indicator mt-2">
+                <div class="loading-spinner"></div>
+                Guardando...
+              </div>
+            </form>
+
+            <div id="settings-response" class="mt-3"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="card">
+          <div class="card-header">
+            <h6 class="mb-0">Herramientas del sistema</h6>
+          </div>
+          <div class="card-body">
+            <div class="d-grid gap-2">
+              <button
+                class="btn btn-outline-info btn-sm"
+                hx-get="/settings/cache/clear"
+                hx-target="#cache-status"
+              >
+                🗑️ Limpiar caché
+              </button>
+
+              <button
+                class="btn btn-outline-warning btn-sm"
+                hx-get="/settings/logs/view"
+                hx-target="#logs-content"
+              >
+                📋 Ver logs
+              </button>
+
+              <button
+                class="btn btn-outline-success btn-sm"
+                hx-get="/settings/backup/create"
+                hx-target="#backup-status"
+              >
+                💾 Crear backup
+              </button>
+
+              <button
+                class="btn btn-outline-danger btn-sm"
+                hx-get="/settings/maintenance"
+                hx-target="#maintenance-status"
+              >
+                🔧 Modo mantenimiento
+              </button>
+            </div>
+
+            <div id="cache-status" class="mt-3"></div>
+            <div id="backup-status" class="mt-3"></div>
+            <div id="maintenance-status" class="mt-3"></div>
+          </div>
+        </div>
+
+        <div class="card mt-3">
+          <div class="card-header">
+            <h6 class="mb-0">Información de la cuenta</h6>
+          </div>
+          <div class="card-body">
+            <div class="mb-2">
+              <small class="text-muted">Usuario:</small><br />
+              <strong>Administrador</strong>
+            </div>
+
+            <div class="mb-2">
+              <small class="text-muted">Último acceso:</small><br />
+              <strong>Hoy, 14:30</strong>
+            </div>
+
+            <div class="mb-2">
+              <small class="text-muted">Sesión activa:</small><br />
+              <span class="badge bg-success">Conectado</span>
+            </div>
+
+            <hr />
+
+            <button
+              class="btn btn-outline-primary btn-sm w-100 mb-2"
+              hx-get="/settings/profile"
+              hx-target="#main-content"
+            >
+              Editar perfil
+            </button>
+
+            <button
+              class="btn btn-outline-danger btn-sm w-100"
+              hx-post="/auth/logout"
+              hx-target="#main-content"
+            >
+              Cerrar sesión
+            </button>
+          </div>
+        </div>
+
+        <div id="logs-content" class="mt-3"></div>
+      </div>
+    </div>
+  </div>
+</div>

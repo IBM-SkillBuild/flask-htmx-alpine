@@ -1,0 +1,127 @@
+<div class="card" id="ocr-history-container">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h6 class="mb-0">📚 Historial de OCR</h6>
+    <div>
+      <button 
+        class="btn btn-outline-danger btn-sm me-2"
+        onclick="clearOcrHistory()"
+      >
+        🗑️ Limpiar
+      </button>
+      <button 
+        class="btn btn-outline-secondary btn-sm"
+        onclick="closeOcrHistory()"
+      >
+        ❌
+      </button>
+    </div>
+  </div>
+  <div class="card-body">
+    <div id="history-content">
+      <p class="text-muted text-center">Cargando historial...</p>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("htmx:afterSettle", function (event) {
+  if (event.target.querySelector("#ocr-history-container")) {
+    loadOcrHistory();
+    console.log('📚 Historial de OCR cargado');
+  }
+});
+
+function loadOcrHistory() {
+  const historyContent = document.getElementById('history-content');
+  const history = JSON.parse(localStorage.getItem('ocr-history') || '[]');
+  
+  if (history.length === 0) {
+    historyContent.innerHTML = '<p class="text-muted text-center">No hay elementos en el historial</p>';
+    return;
+  }
+  
+  let html = '<div class="row">';
+  history.forEach((item, index) => {
+    html += `
+      <div class="col-md-6 mb-3">
+        <div class="card border">
+          <div class="card-body p-3">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <small class="text-muted">${item.timestamp}</small>
+              <button 
+                class="btn btn-sm btn-outline-primary"
+                onclick="loadFromOcrHistory(${index})"
+              >
+                📋 Usar
+              </button>
+            </div>
+            <p class="small mb-2">${item.text.substring(0, 100)}${item.text.length > 100 ? '...' : ''}</p>
+            <div class="d-flex justify-content-between">
+              <small class="text-muted">
+                📁 ${item.filename || 'Sin nombre'}
+              </small>
+              <small class="text-muted">
+                🎯 ${item.confidence}% • 🌍 ${item.language}
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  html += '</div>';
+  
+  historyContent.innerHTML = html;
+}
+
+function loadFromOcrHistory(index) {
+  const history = JSON.parse(localStorage.getItem('ocr-history') || '[]');
+  const item = history[index];
+  
+  if (item) {
+    // Crear resultado simulado
+    const resultHtml = `
+      <div class="alert alert-info">
+        <h5>📚 Cargado desde historial</h5>
+        <textarea class="form-control mt-3" rows="8" id="extracted-text-result">${item.text}</textarea>
+        <div class="mt-3">
+          <button class="btn btn-primary btn-sm me-2" onclick="copyOcrText()">📋 Copiar</button>
+          <button class="btn btn-outline-success btn-sm" onclick="downloadOcrText()">💾 Descargar</button>
+        </div>
+      </div>
+    `;
+    
+    document.getElementById('ocr-results').innerHTML = resultHtml;
+    
+    // Notificar
+    const appElement = document.querySelector('[x-data]');
+    if (appElement && appElement._x_dataStack && appElement._x_dataStack[0]) {
+      appElement._x_dataStack[0].addNotification('Texto cargado desde historial', 'info');
+    }
+  }
+}
+
+function clearOcrHistory() {
+  localStorage.removeItem('ocr-history');
+  loadOcrHistory();
+  
+  // Notificar
+  const appElement = document.querySelector('[x-data]');
+  if (appElement && appElement._x_dataStack && appElement._x_dataStack[0]) {
+    appElement._x_dataStack[0].addNotification('Historial limpiado', 'info');
+  }
+}
+
+function closeOcrHistory() {
+  const container = document.getElementById('ocr-results');
+  if (container) {
+    container.innerHTML = '';
+  }
+  
+  // Mostrar formulario nuevamente
+  const appElement = document.querySelector('[x-data]');
+  if (appElement && appElement._x_dataStack && appElement._x_dataStack[0]) {
+    appElement._x_dataStack[0].showOcrForm = true;
+  }
+}
+</script>

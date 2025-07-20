@@ -1,0 +1,371 @@
+<div class="chat-widget" id="chat-widget-container">
+  <div class="chat-header">
+    <div class="d-flex align-items-center">
+      <div class="chat-avatar me-2">🤖</div>
+      <div>
+        <h6 class="mb-0">Asistente Virtual</h6>
+        <small class="text-success">En línea</small>
+      </div>
+      <button class="btn btn-sm btn-outline-secondary ms-auto" onclick="closeChat()">
+        ❌
+      </button>
+    </div>
+  </div>
+
+  <div class="chat-messages" id="chat-messages">
+    <div class="message bot-message">
+      <div class="message-avatar">🤖</div>
+      <div class="message-content">
+        <div class="message-bubble">
+          ¡Hola! 👋 Soy tu asistente virtual. ¿En qué puedo ayudarte hoy?
+        </div>
+        <small class="message-time">Ahora</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-input">
+    <div class="input-group">
+      <input 
+        type="text" 
+        class="form-control" 
+        id="chat-input" 
+        placeholder="Escribe tu mensaje..."
+        onkeypress="handleChatKeyPress(event)"
+      >
+      <button class="btn btn-primary" onclick="sendMessage()">
+        📤
+      </button>
+    </div>
+  </div>
+
+  <div class="typing-indicator" id="typing-indicator" style="display: none;">
+    <div class="message bot-message">
+      <div class="message-avatar">🤖</div>
+      <div class="message-content">
+        <div class="typing-dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.chat-widget {
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--card-bg);
+  max-width: 400px;
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  animation: chatSlideIn 0.3s ease-out;
+}
+
+@keyframes chatSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.chat-header {
+  background: linear-gradient(135deg, #0d6efd, #0056b3);
+  color: white;
+  padding: 1rem;
+  border-radius: 10px 10px 0 0;
+}
+
+.chat-avatar {
+  width: 35px;
+  height: 35px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2em;
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  background: var(--bg-color);
+}
+
+.message {
+  display: flex;
+  margin-bottom: 1rem;
+  animation: messageSlideIn 0.3s ease-out;
+}
+
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.user-message {
+  flex-direction: row-reverse;
+}
+
+.user-message .message-content {
+  align-items: flex-end;
+}
+
+.user-message .message-bubble {
+  background: #0d6efd;
+  color: white;
+}
+
+.message-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1em;
+  margin: 0 0.5rem;
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
+}
+
+.user-message .message-avatar {
+  background: #0d6efd;
+  color: white;
+  border-color: #0d6efd;
+}
+
+.message-content {
+  display: flex;
+  flex-direction: column;
+  max-width: 70%;
+}
+
+.message-bubble {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  padding: 0.75rem 1rem;
+  color: var(--text-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.message-time {
+  color: var(--footer-text);
+  margin-top: 0.25rem;
+  font-size: 0.75em;
+}
+
+.chat-input {
+  padding: 1rem;
+  background: var(--card-bg);
+  border-top: 1px solid var(--border-color);
+  border-radius: 0 0 10px 10px;
+}
+
+.typing-indicator .typing-dots {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.typing-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-color);
+  margin: 0 2px;
+  animation: typingDot 1.4s infinite ease-in-out;
+  opacity: 0.4;
+}
+
+.typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+.typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes typingDot {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.4;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .chat-widget {
+    max-width: 100%;
+    height: 400px;
+  }
+}
+</style>
+
+<script>
+// Chat bot con IA simulada
+const chatBot = {
+  responses: {
+    // Saludos
+    'hola': ['¡Hola! 👋 ¿Cómo puedo ayudarte hoy?', '¡Hola! Me alegra verte por aquí. ¿En qué puedo asistirte?'],
+    'buenos dias': ['¡Buenos días! ☀️ ¿Cómo puedo ayudarte?', '¡Buenos días! Espero que tengas un excelente día. ¿En qué puedo asistirte?'],
+    'buenas tardes': ['¡Buenas tardes! 🌅 ¿En qué puedo ayudarte?', '¡Buenas tardes! ¿Cómo va tu día?'],
+    'buenas noches': ['¡Buenas noches! 🌙 ¿En qué puedo asistirte?', '¡Buenas noches! ¿Cómo puedo ayudarte?'],
+    
+    // Información general
+    'que es esto': ['Esta es una aplicación SPA (Single Page Application) construida con Flask, HTMX y Alpine.js. ¡Es una demo interactiva!', 'Es una aplicación web moderna que demuestra tecnologías como Flask, HTMX y Alpine.js trabajando juntas.'],
+    'como funciona': ['La aplicación usa HTMX para navegación sin recargas y Alpine.js para reactividad. ¡Todo funciona de forma fluida!', 'Combina el poder del backend Flask con la interactividad del frontend moderno.'],
+    'tecnologias': ['Usamos Flask (Python), HTMX, Alpine.js, Bootstrap y mucho amor por el código limpio! 💻', 'La stack incluye: Flask, HTMX, Alpine.js, Bootstrap CSS y JavaScript vanilla.'],
+    
+    // Soporte
+    'ayuda': ['¡Por supuesto! Puedo ayudarte con información sobre la aplicación, sus funciones o cualquier duda técnica.', 'Estoy aquí para ayudarte. ¿Tienes alguna pregunta específica?'],
+    'problema': ['Lamento escuchar que tienes un problema. ¿Podrías contarme más detalles para poder ayudarte mejor?', '¿Qué tipo de problema estás experimentando? Intentaré ayudarte a resolverlo.'],
+    'error': ['Los errores pueden ser frustrantes. ¿Podrías describir qué error estás viendo?', 'Entiendo tu frustración. ¿Qué mensaje de error aparece?'],
+    
+    // Funcionalidades
+    'contacto': ['Puedes usar el formulario de contacto en esta misma página para enviar un mensaje. ¡Se envía por email!', 'El formulario de contacto está justo arriba. Solo completa los campos y envía tu mensaje.'],
+    'tema': ['¡Puedes cambiar entre tema claro y oscuro usando el botón flotante en la esquina superior derecha! 🌙☀️', 'El botón de tema está en la esquina superior derecha. ¡Prueba cambiar entre claro y oscuro!'],
+    'navegacion': ['Puedes navegar usando el menú superior: Home, Inicio, Acerca de y Contacto. ¡Todo funciona sin recargar la página!', 'La navegación es súper fluida gracias a HTMX. Prueba los enlaces del menú superior.'],
+    
+    // Despedidas
+    'gracias': ['¡De nada! 😊 ¿Hay algo más en lo que pueda ayudarte?', '¡Un placer ayudarte! ¿Necesitas algo más?'],
+    'adios': ['¡Hasta luego! 👋 Que tengas un excelente día.', '¡Nos vemos! Gracias por probar la aplicación. 😊'],
+    'chao': ['¡Chao! 👋 ¡Vuelve cuando quieras!', '¡Hasta pronto! Que tengas un buen día. 😊'],
+    
+    // Default
+    'default': [
+      'Interesante pregunta. ¿Podrías ser más específico?',
+      'No estoy seguro de entender completamente. ¿Podrías reformular tu pregunta?',
+      'Hmm, esa es una buena pregunta. ¿Hay algo específico sobre la aplicación que te gustaría saber?',
+      'Me gustaría ayudarte mejor. ¿Podrías darme más contexto?',
+      'Esa es una consulta interesante. ¿Te refieres a alguna funcionalidad específica de la app?'
+    ]
+  },
+
+  getResponse(message) {
+    const msg = message.toLowerCase().trim();
+    
+    // Buscar coincidencias exactas primero
+    for (const [key, responses] of Object.entries(this.responses)) {
+      if (key !== 'default' && msg.includes(key)) {
+        return responses[Math.floor(Math.random() * responses.length)];
+      }
+    }
+    
+    // Si no hay coincidencias, usar respuesta por defecto
+    const defaultResponses = this.responses.default;
+    return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+  }
+};
+
+// Funciones del chat
+function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const message = input.value.trim();
+  
+  if (!message) return;
+  
+  // Agregar mensaje del usuario
+  addMessage(message, 'user');
+  input.value = '';
+  
+  // Mostrar indicador de escritura
+  showTypingIndicator();
+  
+  // Simular delay de respuesta (1-3 segundos)
+  const delay = Math.random() * 2000 + 1000;
+  setTimeout(() => {
+    hideTypingIndicator();
+    const response = chatBot.getResponse(message);
+    addMessage(response, 'bot');
+  }, delay);
+}
+
+function addMessage(text, sender) {
+  const messagesContainer = document.getElementById('chat-messages');
+  const messageDiv = document.createElement('div');
+  const currentTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+  
+  messageDiv.className = `message ${sender}-message`;
+  messageDiv.innerHTML = `
+    <div class="message-avatar">${sender === 'user' ? '👤' : '🤖'}</div>
+    <div class="message-content">
+      <div class="message-bubble">${text}</div>
+      <small class="message-time">${currentTime}</small>
+    </div>
+  `;
+  
+  messagesContainer.appendChild(messageDiv);
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function showTypingIndicator() {
+  document.getElementById('typing-indicator').style.display = 'block';
+  const messagesContainer = document.getElementById('chat-messages');
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
+
+function hideTypingIndicator() {
+  document.getElementById('typing-indicator').style.display = 'none';
+}
+
+function handleChatKeyPress(event) {
+  if (event.key === 'Enter') {
+    sendMessage();
+  }
+}
+
+function closeChat() {
+  const chatWidget = document.getElementById('chat-widget');
+  if (chatWidget) {
+    chatWidget.innerHTML = '';
+  }
+  
+  // Scroll suave hacia arriba con FluidScroll
+  if (typeof fluidScroll !== "undefined") {
+    fluidScroll({
+      yPos: "start",
+      easing: "easeOutQuart",
+      duration: 1500
+    });
+    console.log('🔝 Scroll to top ejecutado después de cerrar chat');
+  }
+  
+  console.log('💬 Chat cerrado');
+}
+
+// Inicializar chat
+document.addEventListener('htmx:afterSettle', function(event) {
+  if (event.target.querySelector('#chat-widget-container')) {
+    console.log('💬 Chat bot inicializado');
+    
+    // Focus en el input después de un momento
+    setTimeout(() => {
+      const chatInput = document.getElementById('chat-input');
+      if (chatInput) {
+        chatInput.focus();
+      }
+    }, 500);
+  }
+});
+</script>

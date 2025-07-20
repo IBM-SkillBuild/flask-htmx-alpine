@@ -1,0 +1,51 @@
+<div class="alert alert-danger" id="ocr-error-container">
+  <div class="d-flex justify-content-between align-items-start mb-3">
+    <h5 class="mb-0">❌ Error en el procesamiento OCR</h5>
+    <button class="btn btn-sm btn-outline-secondary" onclick="closeOcrError()">❌</button>
+  </div>
+  
+  <p class="mb-3">{{ error }}</p>
+  
+  <div class="d-flex gap-2">
+    <button 
+      class="btn btn-outline-primary btn-sm"
+      onclick="closeOcrError()"
+    >
+      🔄 Intentar de nuevo
+    </button>
+    <button 
+      class="btn btn-outline-secondary btn-sm"
+      hx-get="/ocr/history"
+      hx-target="#ocr-results"
+    >
+      📚 Ver historial
+    </button>
+  </div>
+</div>
+
+<script>
+document.addEventListener("htmx:afterSettle", function (event) {
+  if (event.target.querySelector("#ocr-error-container")) {
+    // Notificar error
+    const appElement = document.querySelector('[x-data]');
+    if (appElement && appElement._x_dataStack && appElement._x_dataStack[0]) {
+      appElement._x_dataStack[0].addNotification('Error en OCR: {{ error }}', 'error');
+    }
+    
+    console.log('❌ Error en OCR: {{ error }}');
+  }
+});
+
+function closeOcrError() {
+  const container = document.getElementById('ocr-results');
+  if (container) {
+    container.innerHTML = '';
+  }
+  
+  // Mostrar formulario nuevamente
+  const appElement = document.querySelector('[x-data]');
+  if (appElement && appElement._x_dataStack && appElement._x_dataStack[0]) {
+    appElement._x_dataStack[0].showOcrForm = true;
+  }
+}
+</script>

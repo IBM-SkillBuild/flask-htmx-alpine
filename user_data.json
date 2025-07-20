@@ -1,0 +1,9 @@
+{
+  "name": "Usuarioqwq",
+  "email": "usuario@ejemplo.com",
+  "preferences": {
+    "theme": "dark",
+    "language": "es",
+    "notifications": true
+  }
+}

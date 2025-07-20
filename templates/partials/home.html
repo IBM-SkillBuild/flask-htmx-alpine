@@ -1,0 +1,320 @@
+<div class="row" x-data="homeData()">
+  <div class="col-12">
+    <h1 class="mb-4">Inicio</h1>
+
+    <div class="row">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Bienvenido a la página de inicio</h5>
+            <p class="card-text">
+              Esta es la página principal de nuestra aplicación SPA. Aquí puedes
+              encontrar información general y acceso rápido a las
+              funcionalidades principales.
+            </p>
+
+            <div class="row mt-4">
+              <div class="col-sm-6 mb-3">
+                <div class="card">
+                  <div class="card-body text-center">
+                    <h6 class="card-title">📊 Dashboard</h6>
+                    <p class="card-text small">Ver estadísticas</p>
+                    <button
+                      class="btn btn-primary btn-sm"
+                      hx-get="/dashboard"
+                      hx-target="#main-content"
+                    >
+                      Acceder
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-sm-6 mb-3">
+                <div class="card">
+                  <div class="card-body text-center">
+                    <h6 class="card-title">⚙️ Configuración</h6>
+                    <p class="card-text small">Ajustar preferencias</p>
+                    <button
+                      class="btn btn-secondary btn-sm"
+                      hx-get="/settings"
+                      hx-target="#main-content"
+                    >
+                      Configurar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-header">
+            <h6 class="mb-0">Acciones rápidas</h6>
+          </div>
+          <div class="card-body">
+            <button
+              class="btn btn-outline-info btn-sm w-100 mb-2"
+              hx-post="/api/refresh"
+              hx-target="#quick-data"
+            >
+              Actualizar
+            </button>
+
+            <div id="quick-data" class="mt-3">
+              <small class="text-muted"
+                >Haz clic en actualizar para ver datos</small
+              >
+            </div>
+
+            <!-- Ejemplo Alpine.js en página cargada dinámicamente -->
+            <hr />
+            <h6>🔥 Alpine.js en página dinámica</h6>
+
+            <div class="mb-2">
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                x-model="quickMessage"
+                placeholder="Escribe un mensaje..."
+              />
+            </div>
+
+            <div class="mb-2">
+              <button
+                class="btn btn-primary btn-sm w-100"
+                @click="addQuickNote()"
+                :disabled="!quickMessage.trim()"
+              >
+                ➕ Agregar nota
+              </button>
+            </div>
+
+            <div class="mt-2">
+              <template x-for="note in quickNotes" :key="note.id">
+                <div
+                  class="alert alert-info alert-sm py-1 px-2 mb-1 d-flex justify-content-between align-items-center"
+                >
+                  <small x-text="note.text"></small>
+                  <button
+                    class="btn btn-sm btn-outline-danger py-0 px-1"
+                    @click="removeQuickNote(note.id)"
+                  >
+                    ×
+                  </button>
+                </div>
+              </template>
+              <div x-show="quickNotes.length === 0" class="text-muted small">
+                No hay notas aún
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel de estadísticas reactivas -->
+    <div class="row mt-4">
+      <div class="col-12">
+        <div class="card">
+          <div
+            class="card-header d-flex justify-content-between align-items-center"
+          >
+            <h6 class="mb-0">📈 Estadísticas en tiempo real (Alpine.js)</h6>
+            <button
+              class="btn btn-outline-primary btn-sm"
+              @click="refreshStats()"
+              :disabled="isRefreshing"
+            >
+              <span x-show="!isRefreshing">🔄</span>
+              <span x-show="isRefreshing">⏳</span>
+            </button>
+          </div>
+          <div class="card-body">
+            <div class="row text-center">
+              <div class="col-3">
+                <div class="h4 text-primary" x-text="homeStats.activeUsers">
+                  0
+                </div>
+                <small class="text-muted">Usuarios activos</small>
+              </div>
+              <div class="col-3">
+                <div class="h4 text-success" x-text="homeStats.todaySales">
+                  0
+                </div>
+                <small class="text-muted">Ventas hoy</small>
+              </div>
+              <div class="col-3">
+                <div class="h4 text-warning" x-text="homeStats.pendingTasks">
+                  0
+                </div>
+                <small class="text-muted">Tareas pendientes</small>
+              </div>
+              <div class="col-3">
+                <div class="h4 text-info" x-text="homeStats.systemLoad + '%'">
+                  0%
+                </div>
+                <small class="text-muted">Carga del sistema</small>
+              </div>
+            </div>
+
+            <div class="mt-3">
+              <small class="text-muted">
+                Última actualización: <span x-text="lastUpdate"></span>
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Script Alpine.js específico para la página Home -->
+<script>
+  // Cargar notas cuando HTMX carga el componente
+  document.addEventListener("htmx:afterSettle", function (event) {
+    // Verificar si este evento es para el contenido de home
+    if (event.target.querySelector('[x-data="homeData()"]')) {
+      // Buscar el componente Alpine y cargar las notas
+      setTimeout(() => {
+        const homeComponent = document.querySelector('[x-data="homeData()"]');
+        if (
+          homeComponent &&
+          homeComponent._x_dataStack &&
+          homeComponent._x_dataStack[0]
+        ) {
+          homeComponent._x_dataStack[0].loadNotesFromStorage();
+          console.log("🔄 Notas cargadas después de navegación HTMX");
+        }
+      }, 100);
+    }
+  });
+
+  function homeData() {
+    return {
+      quickMessage: "",
+      quickNotes: [],
+      homeStats: {
+        activeUsers: 42,
+        todaySales: 1250,
+        pendingTasks: 8,
+        systemLoad: 65,
+      },
+      isRefreshing: false,
+      lastUpdate: new Date().toLocaleTimeString(),
+
+      init() {
+        console.log("Alpine.js inicializado en página Home");
+        this.loadNotesFromStorage();
+        this.startAutoRefresh();
+      },
+
+      addQuickNote() {
+        if (this.quickMessage.trim()) {
+          const note = {
+            id: Date.now(),
+            text: this.quickMessage.trim(),
+            timestamp: new Date().toLocaleTimeString(),
+            date: new Date().toLocaleDateString(),
+          };
+          this.quickNotes.unshift(note);
+          this.quickMessage = "";
+
+          // Guardar en localStorage
+          this.saveNotesToStorage();
+          console.log("📝 Nota agregada y guardada en localStorage");
+        }
+      },
+
+      removeQuickNote(id) {
+        this.quickNotes = this.quickNotes.filter((note) => note.id !== id);
+        // Guardar cambios en localStorage
+        this.saveNotesToStorage();
+        console.log("🗑️ Nota eliminada y localStorage actualizado");
+      },
+
+      // Guardar notas en localStorage
+      saveNotesToStorage() {
+        try {
+          localStorage.setItem(
+            "home-quick-notes",
+            JSON.stringify(this.quickNotes)
+          );
+        } catch (error) {
+          console.error("Error al guardar notas en localStorage:", error);
+        }
+      },
+
+      // Cargar notas desde localStorage
+      loadNotesFromStorage() {
+        try {
+          const savedNotes = localStorage.getItem("home-quick-notes");
+          if (savedNotes) {
+            this.quickNotes = JSON.parse(savedNotes);
+            console.log(
+              `📚 ${this.quickNotes.length} notas cargadas desde localStorage`
+            );
+          }
+        } catch (error) {
+          console.error("Error al cargar notas desde localStorage:", error);
+          this.quickNotes = [];
+        }
+      },
+
+      // Limpiar todas las notas
+      clearAllNotes() {
+        this.quickNotes = [];
+        this.saveNotesToStorage();
+        console.log("🧹 Todas las notas eliminadas");
+      },
+
+      async refreshStats() {
+        this.isRefreshing = true;
+        try {
+          // Simular llamada a API
+          await new Promise((resolve) => setTimeout(resolve, 800));
+
+          // Actualizar estadísticas con valores aleatorios
+          this.homeStats.activeUsers = Math.floor(Math.random() * 100) + 20;
+          this.homeStats.todaySales = Math.floor(Math.random() * 2000) + 500;
+          this.homeStats.pendingTasks = Math.floor(Math.random() * 20);
+          this.homeStats.systemLoad = Math.floor(Math.random() * 40) + 40;
+
+          this.lastUpdate = new Date().toLocaleTimeString();
+
+          // Mostrar notificación usando el sistema global de Alpine.js
+          this.showNotification('Datos aleatorios', 'info');
+        } catch (error) {
+          console.error("Error al actualizar estadísticas:", error);
+        } finally {
+          this.isRefreshing = false;
+        }
+      },
+
+      startAutoRefresh() {
+        // Auto-actualizar cada 30 segundos
+        setInterval(() => {
+          if (!this.isRefreshing) {
+            this.refreshStats();
+          }
+        }, 30000);
+      },
+
+      // Función para mostrar notificaciones
+      showNotification(message, type) {
+        // Buscar el componente principal de Alpine.js
+        const appElement = document.querySelector('body [x-data]');
+        if (appElement && appElement._x_dataStack && appElement._x_dataStack[0]) {
+          appElement._x_dataStack[0].addNotification(message, type);
+          console.log(`📢 Notificación enviada: ${message} (${type})`);
+        } else {
+          console.warn('No se pudo acceder al sistema de notificaciones global');
+        }
+      },
+    };
+  }
+</script>
