@@ -15,7 +15,7 @@ def configure_ocr():
         'tesseract_available': False,
         'easyocr_reader': None
     }
-    
+
     # Intentar configurar EasyOCR (preferido para Render)
     try:
         import easyocr
@@ -27,11 +27,11 @@ def configure_ocr():
         print("⚠️ EasyOCR no está disponible")
     except Exception as e:
         print(f"⚠️ Error configurando EasyOCR: {e}")
-    
+
     # Intentar configurar Tesseract como fallback
     try:
         import pytesseract
-        
+
         if platform.system() == 'Windows':
             # Rutas comunes de instalación de Tesseract en Windows
             possible_paths = [
@@ -55,10 +55,10 @@ def configure_ocr():
                 pytesseract.pytesseract.tesseract_cmd = tesseract_path
                 ocr_config['tesseract_available'] = True
                 print(f"✅ Tesseract encontrado en Linux: {tesseract_path}")
-                
+
     except ImportError:
         print("⚠️ pytesseract no está instalado")
-    
+
     # Mostrar configuración final
     if ocr_config['easyocr_available']:
         print("🔍 OCR principal: EasyOCR")
@@ -66,7 +66,7 @@ def configure_ocr():
         print("🔍 OCR principal: Tesseract")
     else:
         print("⚠️ No hay OCR real disponible, usando simulación")
-    
+
     return ocr_config
 
 
@@ -554,38 +554,41 @@ def ocr_process():
         if OCR_CONFIG['easyocr_available']:
             try:
                 print(f"🔍 Procesando imagen con EasyOCR (idioma: {language})")
-                
+
                 # Leer la imagen desde el archivo subido
                 image_data = file.read()
-                
+
                 # Procesar con EasyOCR
                 results = OCR_CONFIG['easyocr_reader'].readtext(image_data)
-                
+
                 # Extraer texto y confianza
                 extracted_texts = []
                 confidences = []
-                
+
                 for (bbox, text, confidence) in results:
                     extracted_texts.append(text)
-                    confidences.append(confidence * 100)  # EasyOCR da confianza 0-1
-                
+                    # EasyOCR da confianza 0-1
+                    confidences.append(confidence * 100)
+
                 extracted_text = ' '.join(extracted_texts).strip()
-                avg_confidence = sum(confidences) / len(confidences) if confidences else 0
-                
+                avg_confidence = sum(confidences) / \
+                    len(confidences) if confidences else 0
+
                 if not extracted_text:
                     print("⚠️ EasyOCR no extrajo texto, intentando con Tesseract...")
                 else:
-                    print(f"✅ EasyOCR completado. Texto extraído: {len(extracted_text)} caracteres")
+                    print(
+                        f"✅ EasyOCR completado. Texto extraído: {len(extracted_text)} caracteres")
                     return render_template('responses/prueba_texto.html',
                                            text=extracted_text,
                                            confidence=int(avg_confidence),
                                            language=language,
                                            filename=file.filename)
-                
+
             except Exception as ocr_error:
                 print(f"❌ Error en EasyOCR: {ocr_error}")
                 print("⚠️ Intentando con Tesseract como fallback...")
-        
+
         # Fallback a Tesseract si EasyOCR no está disponible o falló
         if OCR_CONFIG['tesseract_available']:
             try:
@@ -593,7 +596,8 @@ def ocr_process():
                 from PIL import Image
                 import io
 
-                print(f"🔍 Procesando imagen con Tesseract (idioma: {tesseract_lang})")
+                print(
+                    f"🔍 Procesando imagen con Tesseract (idioma: {tesseract_lang})")
 
                 # Leer la imagen desde el archivo subido (resetear posición si ya se leyó)
                 file.seek(0)
@@ -601,14 +605,17 @@ def ocr_process():
                 image = Image.open(io.BytesIO(image_data))
 
                 # Procesar con Tesseract
-                extracted_text = pytesseract.image_to_string(image, lang=tesseract_lang)
+                extracted_text = pytesseract.image_to_string(
+                    image, lang=tesseract_lang)
 
                 # Calcular confianza
                 try:
                     data = pytesseract.image_to_data(
                         image, lang=tesseract_lang, output_type=pytesseract.Output.DICT)
-                    confidences = [int(conf) for conf in data['conf'] if int(conf) > 0]
-                    confidence = sum(confidences) // len(confidences) if confidences else 0
+                    confidences = [int(conf)
+                                   for conf in data['conf'] if int(conf) > 0]
+                    confidence = sum(
+                        confidences) // len(confidences) if confidences else 0
                 except:
                     confidence = 85
 
@@ -617,7 +624,8 @@ def ocr_process():
                 if not extracted_text:
                     print("⚠️ Tesseract no extrajo texto, usando simulación...")
                 else:
-                    print(f"✅ Tesseract completado. Texto extraído: {len(extracted_text)} caracteres")
+                    print(
+                        f"✅ Tesseract completado. Texto extraído: {len(extracted_text)} caracteres")
                     return render_template('responses/prueba_texto.html',
                                            text=extracted_text,
                                            confidence=confidence,
@@ -626,29 +634,29 @@ def ocr_process():
 
             except Exception as ocr_error:
                 print(f"❌ Error en Tesseract: {ocr_error}")
-        
+
         # Fallback final: usar texto simulado
         print("⚠️ No hay OCR real disponible. Usando texto simulado.")
 
-            # Texto simulado basado en el idioma
-            sample_texts = {
-                'spa': 'Este es un texto de ejemplo extraído de la imagen. La tecnología OCR permite convertir imágenes con texto en texto editable.',
-                'eng': 'This is a sample text extracted from the image. OCR technology allows converting images with text into editable text.',
-                'fra': 'Ceci est un exemple de texte extrait de l\'image. La technologie OCR permet de convertir des images avec du texte en texte modifiable.',
-                'deu': 'Dies ist ein Beispieltext, der aus dem Bild extrahiert wurde. Die OCR-Technologie ermöglicht es, Bilder mit Text in bearbeitbaren Text umzuwandeln.',
-                'ita': 'Questo è un testo di esempio estratto dall\'immagine. La tecnologia OCR consente di convertire immagini con testo in testo modificabile.',
-                'por': 'Este é um texto de exemplo extraído da imagem. A tecnologia OCR permite converter imagens com texto em texto editável.'
-            }
+        # Texto simulado basado en el idioma
+        sample_texts = {
+            'spa': 'Este es un texto de ejemplo extraído de la imagen. La tecnología OCR permite convertir imágenes con texto en texto editable.',
+            'eng': 'This is a sample text extracted from the image. OCR technology allows converting images with text into editable text.',
+            'fra': 'Ceci est un exemple de texte extrait de l\'image. La technologie OCR permet de convertir des images avec du texte en texte modifiable.',
+            'deu': 'Dies ist ein Beispieltext, der aus dem Bild extrahiert wurde. Die OCR-Technologie ermöglicht es, Bilder mit Text in bearbeitbaren Text umzuwandeln.',
+            'ita': 'Questo è un testo di esempio estratto dall\'immagine. La tecnologia OCR consente di convertire immagini con testo in testo modificabile.',
+            'por': 'Este é um texto de exemplo extraído da imagem. A tecnologia OCR permite converter imagens com texto em texto editável.'
+        }
 
-            import random
-            extracted_text = sample_texts.get(language, sample_texts['spa'])
-            confidence = random.randint(85, 98)
+        import random
+        extracted_text = sample_texts.get(language, sample_texts['spa'])
+        confidence = random.randint(85, 98)
 
-            return render_template('responses/prueba_texto.html',
-                                   text=extracted_text,
-                                   confidence=confidence,
-                                   language=language,
-                                   filename=file.filename)
+        return render_template('responses/prueba_texto.html',
+                               text=extracted_text,
+                               confidence=confidence,
+                               language=language,
+                               filename=file.filename)
 
     except Exception as e:
         print(f"Error en OCR: {e}")
