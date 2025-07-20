@@ -1,26 +1,21 @@
 #!/bin/bash
 
-# Install dependencies with cache optimization
-pip install --cache-dir /tmp/pip-cache --upgrade pip
-pip install --cache-dir /tmp/pip-cache -r requirements.txt
+# Simple and reliable build process
+echo "Starting build process..."
 
-# Verify gunicorn installation
-python -m pip show gunicorn || pip install gunicorn==21.2.0
+# Upgrade pip first
+pip install --upgrade pip
 
-# Create necessary directories if they don't exist
-mkdir -p static/images
-mkdir -p templates
+# Install all dependencies
+pip install -r requirements.txt
 
-# Pre-compile Python files for faster startup
-python -m compileall . || echo "Compilation warnings ignored"
+# Verify Flask installation
+python -c "import flask; print(f'Flask {flask.__version__} installed successfully')"
 
-# Verify critical files exist
-if [ ! -f "app.py" ]; then
-    echo "ERROR: app.py not found!"
-    exit 1
-fi
+# Verify gunicorn installation  
+python -c "import gunicorn; print(f'Gunicorn installed successfully')"
 
-# Test gunicorn availability
-which gunicorn || echo "WARNING: gunicorn not in PATH, will use python -m gunicorn"
+# Create necessary directories
+mkdir -p static/images templates
 
 echo "Build completed successfully!"
