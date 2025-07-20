@@ -567,15 +567,18 @@ def ocr_process():
 
                 for (bbox, text, confidence) in results:
                     extracted_texts.append(text)
-                    confidences.append(confidence * 100)  # EasyOCR da confianza 0-1
+                    # EasyOCR da confianza 0-1
+                    confidences.append(confidence * 100)
 
                 extracted_text = ' '.join(extracted_texts).strip()
-                avg_confidence = sum(confidences) / len(confidences) if confidences else 0
+                avg_confidence = sum(confidences) / \
+                    len(confidences) if confidences else 0
 
                 if not extracted_text:
                     print("⚠️ EasyOCR no extrajo texto, intentando con Tesseract...")
                 else:
-                    print(f"✅ EasyOCR completado. Texto extraído: {len(extracted_text)} caracteres")
+                    print(
+                        f"✅ EasyOCR completado. Texto extraído: {len(extracted_text)} caracteres")
                     return render_template('responses/prueba_texto.html',
                                            text=extracted_text,
                                            confidence=int(avg_confidence),
