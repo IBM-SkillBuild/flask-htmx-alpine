@@ -10,12 +10,17 @@ pip --version
 echo "=== Upgrading pip ==="
 python -m pip install --upgrade pip
 
-echo "=== Installing dependencies ==="
-python -m pip install -r requirements.txt
+echo "=== Installing minimal dependencies first ==="
+python -m pip install -r requirements-minimal.txt
 
-echo "=== Verifying installations ==="
-python -c "import flask; print(f'✓ Flask {flask.__version__} installed')" || echo "✗ Flask installation failed"
-python -c "import gunicorn; print(f'✓ Gunicorn installed')" || echo "✗ Gunicorn installation failed"
+echo "=== Installing optional dependencies ==="
+python -m pip install Pillow==10.0.1 || echo "⚠️ Pillow installation failed, continuing..."
+python -m pip install pytesseract==0.3.10 || echo "⚠️ pytesseract installation failed, continuing..."
+
+echo "=== Verifying core installations ==="
+python -c "import flask; print(f'✓ Flask {flask.__version__} installed')"
+python -c "import gunicorn; print(f'✓ Gunicorn installed')"
+python -c "import flask_mail; print('✓ Flask-Mail installed')"
 
 echo "=== Creating directories ==="
 mkdir -p static/images templates
