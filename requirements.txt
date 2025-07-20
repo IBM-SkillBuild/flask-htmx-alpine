@@ -1,5 +1,5 @@
-# Dependencias principales
-Flask==2.3.3
+# Dependencias principales - Versiones compatibles con Render
+Flask==3.0.0
 Flask-Mail==0.9.1
 
 # Para cargar variables de entorno
@@ -9,11 +9,11 @@ python-dotenv==1.0.0
 pytesseract==0.3.10
 Pillow==10.0.1
 
-# Servidor de producción
-gunicorn==21.2.0
+# Servidor de producción - Versión estable para Render
+gunicorn==20.1.0
 
 # Para health check avanzado
-psutil==5.9.6
+psutil==5.9.5
 
 # Dependencias adicionales (opcionales)
 # Werkzeug==2.3.7  # Ya incluido con Flask

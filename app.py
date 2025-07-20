@@ -122,7 +122,7 @@ def health_check():
     from datetime import datetime
     import psutil
     import os
-    
+
     try:
         # Verificar componentes críticos
         health_status = {
@@ -138,7 +138,7 @@ def health_check():
                 'dependencies': 'ok'
             }
         }
-        
+
         # Información del sistema (opcional)
         try:
             memory = psutil.virtual_memory()
@@ -149,15 +149,16 @@ def health_check():
             }
         except:
             health_status['system'] = 'unavailable'
-        
+
         # Verificar si algún check falló
-        failed_checks = [k for k, v in health_status['checks'].items() if v == 'error']
+        failed_checks = [
+            k for k, v in health_status['checks'].items() if v == 'error']
         if failed_checks:
             health_status['status'] = 'degraded'
             return jsonify(health_status), 503
-            
+
         return jsonify(health_status), 200
-        
+
     except Exception as e:
         return jsonify({
             'status': 'unhealthy',
