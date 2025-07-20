@@ -7,8 +7,28 @@ import json
 import platform
 import shutil
 
-def configure_tesseract():
-    """Configura Tesseract según el entorno (Windows, Linux/Render)"""
+
+def configure_ocr():
+    """Configura el sistema OCR disponible (EasyOCR, Tesseract, o simulado)"""
+    ocr_config = {
+        'easyocr_available': False,
+        'tesseract_available': False,
+        'easyocr_reader': None
+    }
+    
+    # Intentar configurar EasyOCR (preferido para Render)
+    try:
+        import easyocr
+        # Inicializar EasyOCR con idiomas español e inglés
+        ocr_config['easyocr_reader'] = easyocr.Reader(['en', 'es'], gpu=False)
+        ocr_config['easyocr_available'] = True
+        print("✅ EasyOCR configurado correctamente (inglés y español)")
+    except ImportError:
+        print("⚠️ EasyOCR no está disponible")
+    except Exception as e:
+        print(f"⚠️ Error configurando EasyOCR: {e}")
+    
+    # Intentar configurar Tesseract como fallback
     try:
         import pytesseract
         
@@ -25,29 +45,33 @@ def configure_tesseract():
             for path in possible_paths:
                 if os.path.exists(path):
                     pytesseract.pytesseract.tesseract_cmd = path
+                    ocr_config['tesseract_available'] = True
                     print(f"✅ Tesseract encontrado en Windows: {path}")
-                    return True
-            
-            print("⚠️ Tesseract no encontrado en rutas comunes de Windows.")
-            return False
-            
+                    break
         else:
             # Linux/Render - Tesseract debería estar en PATH
             tesseract_path = shutil.which('tesseract')
             if tesseract_path:
                 pytesseract.pytesseract.tesseract_cmd = tesseract_path
+                ocr_config['tesseract_available'] = True
                 print(f"✅ Tesseract encontrado en Linux: {tesseract_path}")
-                return True
-            else:
-                print("⚠️ Tesseract no encontrado en PATH de Linux.")
-                return False
                 
     except ImportError:
-        print("⚠️ pytesseract no está instalado.")
-        return False
+        print("⚠️ pytesseract no está instalado")
+    
+    # Mostrar configuración final
+    if ocr_config['easyocr_available']:
+        print("🔍 OCR principal: EasyOCR")
+    elif ocr_config['tesseract_available']:
+        print("🔍 OCR principal: Tesseract")
+    else:
+        print("⚠️ No hay OCR real disponible, usando simulación")
+    
+    return ocr_config
 
-# Configurar Tesseract al iniciar la aplicación
-TESSERACT_AVAILABLE = configure_tesseract()
+
+# Configurar OCR al iniciar la aplicación
+OCR_CONFIG = configure_ocr()
 
 # Cargar variables de entorno desde .env si existe
 try:
@@ -526,56 +550,85 @@ def ocr_process():
 
         tesseract_lang = tesseract_languages.get(language, 'spa')
 
-        # Verificar si Tesseract está disponible
-        if TESSERACT_AVAILABLE:
+        # Intentar OCR real con EasyOCR primero, luego Tesseract como fallback
+        if OCR_CONFIG['easyocr_available']:
             try:
-                # Usar pytesseract para OCR real
+                print(f"🔍 Procesando imagen con EasyOCR (idioma: {language})")
+                
+                # Leer la imagen desde el archivo subido
+                image_data = file.read()
+                
+                # Procesar con EasyOCR
+                results = OCR_CONFIG['easyocr_reader'].readtext(image_data)
+                
+                # Extraer texto y confianza
+                extracted_texts = []
+                confidences = []
+                
+                for (bbox, text, confidence) in results:
+                    extracted_texts.append(text)
+                    confidences.append(confidence * 100)  # EasyOCR da confianza 0-1
+                
+                extracted_text = ' '.join(extracted_texts).strip()
+                avg_confidence = sum(confidences) / len(confidences) if confidences else 0
+                
+                if not extracted_text:
+                    print("⚠️ EasyOCR no extrajo texto, intentando con Tesseract...")
+                else:
+                    print(f"✅ EasyOCR completado. Texto extraído: {len(extracted_text)} caracteres")
+                    return render_template('responses/prueba_texto.html',
+                                           text=extracted_text,
+                                           confidence=int(avg_confidence),
+                                           language=language,
+                                           filename=file.filename)
+                
+            except Exception as ocr_error:
+                print(f"❌ Error en EasyOCR: {ocr_error}")
+                print("⚠️ Intentando con Tesseract como fallback...")
+        
+        # Fallback a Tesseract si EasyOCR no está disponible o falló
+        if OCR_CONFIG['tesseract_available']:
+            try:
                 import pytesseract
                 from PIL import Image
                 import io
 
                 print(f"🔍 Procesando imagen con Tesseract (idioma: {tesseract_lang})")
 
-                # Leer la imagen desde el archivo subido
+                # Leer la imagen desde el archivo subido (resetear posición si ya se leyó)
+                file.seek(0)
                 image_data = file.read()
                 image = Image.open(io.BytesIO(image_data))
 
                 # Procesar con Tesseract
-                extracted_text = pytesseract.image_to_string(
-                    image, lang=tesseract_lang)
+                extracted_text = pytesseract.image_to_string(image, lang=tesseract_lang)
 
-                # Calcular confianza (pytesseract puede dar datos de confianza)
+                # Calcular confianza
                 try:
                     data = pytesseract.image_to_data(
                         image, lang=tesseract_lang, output_type=pytesseract.Output.DICT)
-                    confidences = [int(conf)
-                                   for conf in data['conf'] if int(conf) > 0]
-                    confidence = sum(
-                        confidences) // len(confidences) if confidences else 0
+                    confidences = [int(conf) for conf in data['conf'] if int(conf) > 0]
+                    confidence = sum(confidences) // len(confidences) if confidences else 0
                 except:
-                    confidence = 85  # Valor por defecto
+                    confidence = 85
 
-                # Limpiar texto extraído
                 extracted_text = extracted_text.strip()
 
                 if not extracted_text:
-                    return render_template('responses/ocr_error.html',
-                                           error='No se pudo extraer texto de la imagen')
-
-                print(f"✅ OCR completado. Texto extraído: {len(extracted_text)} caracteres")
-                return render_template('responses/prueba_texto.html',
-                                       text=extracted_text,
-                                       confidence=confidence,
-                                       language=language,
-                                       filename=file.filename)
+                    print("⚠️ Tesseract no extrajo texto, usando simulación...")
+                else:
+                    print(f"✅ Tesseract completado. Texto extraído: {len(extracted_text)} caracteres")
+                    return render_template('responses/prueba_texto.html',
+                                           text=extracted_text,
+                                           confidence=confidence,
+                                           language=language,
+                                           filename=file.filename)
 
             except Exception as ocr_error:
-                print(f"❌ Error en OCR real: {ocr_error}")
-                # Continuar con texto simulado como fallback
+                print(f"❌ Error en Tesseract: {ocr_error}")
         
-        # Fallback: usar texto simulado si Tesseract no está disponible o falla
-            # Si pytesseract no está instalado, usar texto simulado como fallback
-            print("⚠️ pytesseract no está instalado. Usando texto simulado.")
+        # Fallback final: usar texto simulado
+        print("⚠️ No hay OCR real disponible. Usando texto simulado.")
 
             # Texto simulado basado en el idioma
             sample_texts = {
