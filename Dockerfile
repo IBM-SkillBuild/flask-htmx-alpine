@@ -7,9 +7,12 @@ RUN apk add --no-cache \
     libpng-dev \
     freetype-dev \
     libstdc++
+# Instala Tesseract OCR en el sistema
+RUN apt-get update && apt-get install -y tesseract-ocr && rm -rf /var/lib/apt/lists/*
+
+# Copia los requirements primero para aprovechar el cache
 COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel
-RUN pip install --no-cache-dir --verbose -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Etapa final
 FROM python:3.11-alpine
