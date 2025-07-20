@@ -5,7 +5,7 @@ python-dotenv==1.0.0
 
 # OCR simple y efectivo
 Pillow==10.4.0
-easyocr==1.7.1
+pytesseract==0.3.10
 
 # Servidor de producción
 gunicorn==20.1.0
