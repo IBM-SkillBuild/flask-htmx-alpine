@@ -1,20 +1,14 @@
-# Dependencias principales - Versiones compatibles con Render
+# Dependencias principales - Versiones estables para Docker
 Flask==3.0.0
 Flask-Mail==0.9.1
-
-# Para cargar variables de entorno
 python-dotenv==1.0.0
 
-# Para OCR (Reconocimiento Óptico de Caracteres)
+# OCR - Versiones compatibles con Docker
 pytesseract==0.3.10
 Pillow==10.0.1
 
-# Servidor de producción - Versión estable para Render
+# Servidor de producción
 gunicorn==20.1.0
 
-# Para health check avanzado
+# Health check
 psutil==5.9.5
-
-# Dependencias adicionales (opcionales)
-# Werkzeug==2.3.7  # Ya incluido con Flask
-# Jinja2==3.1.2     # Ya incluido con Flask
