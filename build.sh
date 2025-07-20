@@ -16,7 +16,7 @@ python -c "import flask; print(f'✓ Flask {flask.__version__} installed')"
 python -c "import gunicorn; print(f'✓ Gunicorn installed')"
 python -c "import flask_mail; print('✓ Flask-Mail installed')"
 python -c "import PIL; print(f'✓ Pillow installed')"
-python -c "from paddleocr import PaddleOCR; print('✓ PaddleOCR installed')" || echo "⚠️ PaddleOCR not available"
+python -c "import easyocr; print('✓ EasyOCR installed')" || echo "⚠️ EasyOCR not available"
 
 echo "=== Creating directories ==="
 mkdir -p static/images templates

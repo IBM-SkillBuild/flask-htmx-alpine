@@ -3,9 +3,9 @@ Flask==3.0.0
 Flask-Mail==0.9.1
 python-dotenv==1.0.0
 
-# OCR - versiones compatibles con Python 3.13
+# OCR simple y efectivo
 Pillow==10.4.0
-paddleocr==2.7.3
+easyocr==1.7.1
 
 # Servidor de producción
 gunicorn==20.1.0
