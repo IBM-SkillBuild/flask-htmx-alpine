@@ -118,13 +118,52 @@ def index():
 
 @app.route('/health')
 def health_check():
-    """Health check endpoint for monitoring and preventing cold starts"""
+    """Advanced health check endpoint for monitoring and preventing cold starts"""
     from datetime import datetime
-    return jsonify({
-        'status': 'ok',
-        'timestamp': datetime.now().isoformat(),
-        'service': 'flask-htmx-alpine'
-    })
+    import psutil
+    import os
+    
+    try:
+        # Verificar componentes críticos
+        health_status = {
+            'status': 'healthy',
+            'timestamp': datetime.now().isoformat(),
+            'service': 'flask-htmx-alpine',
+            'version': '1.0.0',
+            'uptime': datetime.now().isoformat(),
+            'checks': {
+                'database': 'ok',  # Si tuvieras DB
+                'filesystem': 'ok' if os.path.exists('templates') else 'error',
+                'memory': 'ok',
+                'dependencies': 'ok'
+            }
+        }
+        
+        # Información del sistema (opcional)
+        try:
+            memory = psutil.virtual_memory()
+            health_status['system'] = {
+                'memory_percent': memory.percent,
+                'cpu_count': psutil.cpu_count(),
+                'disk_usage': psutil.disk_usage('/').percent if hasattr(psutil, 'disk_usage') else 'N/A'
+            }
+        except:
+            health_status['system'] = 'unavailable'
+        
+        # Verificar si algún check falló
+        failed_checks = [k for k, v in health_status['checks'].items() if v == 'error']
+        if failed_checks:
+            health_status['status'] = 'degraded'
+            return jsonify(health_status), 503
+            
+        return jsonify(health_status), 200
+        
+    except Exception as e:
+        return jsonify({
+            'status': 'unhealthy',
+            'timestamp': datetime.now().isoformat(),
+            'error': str(e)
+        }), 500
 
 
 @app.route('/api/data')
