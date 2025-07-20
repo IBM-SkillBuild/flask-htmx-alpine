@@ -3,30 +3,51 @@ from flask_mail import Mail, Message
 import os
 import json
 
-# Configurar ruta de Tesseract para Windows (si es necesario)
+# Configurar ruta de Tesseract según el entorno
 import platform
-if platform.system() == 'Windows':
-    # Rutas comunes de instalación de Tesseract en Windows
-    possible_paths = [
-        r'C:\Program Files\Tesseract-OCR\tesseract.exe',
-        r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe',
-        r'C:\Users\{}\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'.format(
-            os.getenv('USERNAME', '')),
-        r'C:\tools\tesseract\tesseract.exe'  # Chocolatey
-    ]
+import shutil
 
-    for path in possible_paths:
-        if os.path.exists(path):
-            try:
-                import pytesseract
-                pytesseract.pytesseract.tesseract_cmd = path
-                print(f"✅ Tesseract encontrado en: {path}")
-                break
-            except ImportError:
-                pass
-    else:
-        print(
-            "⚠️ Tesseract no encontrado en rutas comunes. Asegúrate de que esté instalado.")
+def configure_tesseract():
+    """Configura Tesseract según el entorno (Windows, Linux/Render)"""
+    try:
+        import pytesseract
+        
+        if platform.system() == 'Windows':
+            # Rutas comunes de instalación de Tesseract en Windows
+            possible_paths = [
+                r'C:\Program Files\Tesseract-OCR\tesseract.exe',
+                r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe',
+                r'C:\Users\{}\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'.format(
+                    os.getenv('USERNAME', '')),
+                r'C:\tools\tesseract\tesseract.exe'  # Chocolatey
+            ]
+
+            for path in possible_paths:
+                if os.path.exists(path):
+                    pytesseract.pytesseract.tesseract_cmd = path
+                    print(f"✅ Tesseract encontrado en Windows: {path}")
+                    return True
+            
+            print("⚠️ Tesseract no encontrado en rutas comunes de Windows.")
+            return False
+            
+        else:
+            # Linux/Render - Tesseract debería estar en PATH
+            tesseract_path = shutil.which('tesseract')
+            if tesseract_path:
+                pytesseract.pytesseract.tesseract_cmd = tesseract_path
+                print(f"✅ Tesseract encontrado en Linux: {tesseract_path}")
+                return True
+            else:
+                print("⚠️ Tesseract no encontrado en PATH de Linux.")
+                return False
+                
+    except ImportError:
+        print("⚠️ pytesseract no está instalado.")
+        return False
+
+# Configurar Tesseract al iniciar la aplicación
+TESSERACT_AVAILABLE = configure_tesseract()
 
 # Cargar variables de entorno desde .env si existe
 try:
@@ -505,45 +526,54 @@ def ocr_process():
 
         tesseract_lang = tesseract_languages.get(language, 'spa')
 
-        try:
-            # Intentar usar pytesseract para OCR real
-            import pytesseract
-            from PIL import Image
-            import io
-
-            # Leer la imagen desde el archivo subido
-            image_data = file.read()
-            image = Image.open(io.BytesIO(image_data))
-
-            # Procesar con Tesseract
-            extracted_text = pytesseract.image_to_string(
-                image, lang=tesseract_lang)
-
-            # Calcular confianza (pytesseract puede dar datos de confianza)
+        # Verificar si Tesseract está disponible
+        if TESSERACT_AVAILABLE:
             try:
-                data = pytesseract.image_to_data(
-                    image, lang=tesseract_lang, output_type=pytesseract.Output.DICT)
-                confidences = [int(conf)
-                               for conf in data['conf'] if int(conf) > 0]
-                confidence = sum(
-                    confidences) // len(confidences) if confidences else 0
-            except:
-                confidence = 85  # Valor por defecto
+                # Usar pytesseract para OCR real
+                import pytesseract
+                from PIL import Image
+                import io
 
-            # Limpiar texto extraído
-            extracted_text = extracted_text.strip()
+                print(f"🔍 Procesando imagen con Tesseract (idioma: {tesseract_lang})")
 
-            if not extracted_text:
-                return render_template('responses/ocr_error.html',
-                                       error='No se pudo extraer texto de la imagen')
+                # Leer la imagen desde el archivo subido
+                image_data = file.read()
+                image = Image.open(io.BytesIO(image_data))
 
-            return render_template('responses/prueba_texto.html',
-                                   text=extracted_text,
-                                   confidence=confidence,
-                                   language=language,
-                                   filename=file.filename)
+                # Procesar con Tesseract
+                extracted_text = pytesseract.image_to_string(
+                    image, lang=tesseract_lang)
 
-        except ImportError:
+                # Calcular confianza (pytesseract puede dar datos de confianza)
+                try:
+                    data = pytesseract.image_to_data(
+                        image, lang=tesseract_lang, output_type=pytesseract.Output.DICT)
+                    confidences = [int(conf)
+                                   for conf in data['conf'] if int(conf) > 0]
+                    confidence = sum(
+                        confidences) // len(confidences) if confidences else 0
+                except:
+                    confidence = 85  # Valor por defecto
+
+                # Limpiar texto extraído
+                extracted_text = extracted_text.strip()
+
+                if not extracted_text:
+                    return render_template('responses/ocr_error.html',
+                                           error='No se pudo extraer texto de la imagen')
+
+                print(f"✅ OCR completado. Texto extraído: {len(extracted_text)} caracteres")
+                return render_template('responses/prueba_texto.html',
+                                       text=extracted_text,
+                                       confidence=confidence,
+                                       language=language,
+                                       filename=file.filename)
+
+            except Exception as ocr_error:
+                print(f"❌ Error en OCR real: {ocr_error}")
+                # Continuar con texto simulado como fallback
+        
+        # Fallback: usar texto simulado si Tesseract no está disponible o falla
             # Si pytesseract no está instalado, usar texto simulado como fallback
             print("⚠️ pytesseract no está instalado. Usando texto simulado.")
 
