@@ -1,21 +1,23 @@
 #!/bin/bash
+set -e  # Exit on any error
 
-# Simple and reliable build process
-echo "Starting build process..."
+echo "=== Starting build process ==="
 
-# Upgrade pip first
-pip install --upgrade pip
+# Show Python version
+python --version
+pip --version
 
-# Install all dependencies
-pip install -r requirements.txt
+echo "=== Upgrading pip ==="
+python -m pip install --upgrade pip
 
-# Verify Flask installation
-python -c "import flask; print(f'Flask {flask.__version__} installed successfully')"
+echo "=== Installing dependencies ==="
+python -m pip install -r requirements.txt
 
-# Verify gunicorn installation  
-python -c "import gunicorn; print(f'Gunicorn installed successfully')"
+echo "=== Verifying installations ==="
+python -c "import flask; print(f'✓ Flask {flask.__version__} installed')" || echo "✗ Flask installation failed"
+python -c "import gunicorn; print(f'✓ Gunicorn installed')" || echo "✗ Gunicorn installation failed"
 
-# Create necessary directories
+echo "=== Creating directories ==="
 mkdir -p static/images templates
 
-echo "Build completed successfully!"
+echo "=== Build completed successfully! ==="
