@@ -1,56 +1,51 @@
-# Use Python 3.11 slim image
-FROM python:3.11-slim
-
-# Set working directory
+# Etapa de construcción
+FROM python:3.11-slim AS builder
 WORKDIR /app
-
-# Install system dependencies for EasyOCR
-RUN apt-get update && apt-get install -y \
+# Instalar dependencias del sistema necesarias para easyocr
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libglib2.0-0 \
     libsm6 \
     libxext6 \
     libxrender-dev \
     libgomp1 \
-    libgthread-2.0-0 \
-    libfontconfig1 \
-    libxss1 \
-    libgconf-2-4 \
-    curl \
     && rm -rf /var/lib/apt/lists/*
-
-# Upgrade pip and install wheel
-RUN pip install --upgrade pip setuptools wheel
-
-# Copy requirements first for better caching
+# Actualizar pip y copiar requirements.txt
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 COPY requirements.txt .
-
-# Install Python dependencies with verbose output
+# Instalar dependencias Python
 RUN pip install --no-cache-dir --verbose -r requirements.txt
 
-# Copy application code
+# Etapa final
+FROM python:3.11-slim
+WORKDIR /app
+# Copiar dependencias instaladas desde la etapa de construcción
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
+# Instalar solo las dependencias mínimas del sistema en la imagen final
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+# Copiar el código de la aplicación
 COPY . .
-
-# Create necessary directories
+# Crear directorios necesarios
 RUN mkdir -p static/images templates uploads
-
-# Set environment variables
+# Configurar variables de entorno
 ENV FLASK_APP=app.py
 ENV FLASK_ENV=production
 ENV PORT=8080
 ENV PYTHONPATH=/app
 ENV PYTHONUNBUFFERED=1
-
-# Create non-root user for security
-RUN useradd --create-home --shell /bin/bash app
-RUN chown -R app:app /app
+# Crear usuario no root
+RUN useradd --create-home --shell /bin/bash app && chown -R app:app /app
 USER app
-
-# Expose port
+# Exponer puerto
 EXPOSE 8080
-
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:$PORT/health || exit 1
-
-# Run the application
+# Iniciar la aplicación
 CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "1", "--threads", "2", "--timeout", "30", "app:app"]
